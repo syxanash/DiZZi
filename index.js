@@ -1,13 +1,14 @@
 const noble = require('@abandonware/noble');
 
 const peripheralName = 'BEYBLADE_TOOL01';
+const subCharacteristics = '55c4f002f8eb11ecb9390242ac120002';
 
 const packets = [];
 let dataStream = [];
 let flushTimer = undefined;
-let captureCounter = 0;
 
 function processPayload() {
+  console.log('===== PROCESSED PAYLOADS ======')
   console.log(packets);
 }
 
@@ -53,15 +54,15 @@ noble.on('discover', async (peripheral) => {
           }
         }
 
-        if (char.uuid == '55c4f002f8eb11ecb9390242ac120002') {
+        if (char.uuid == subCharacteristics) {
 
           char.on('data', (data, isNotification) => {
             dataStream.push(data);
 
             clearTimeout(flushTimer)
             flushTimer = setTimeout(() => {
-              packets.push({[captureCounter]: dataStream});
-              captureCounter++;
+              const formattedDate = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
+              packets.push({[formattedDate]: dataStream});
               dataStream = [];
 
               processPayload();
