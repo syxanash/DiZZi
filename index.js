@@ -1,8 +1,8 @@
 const noble = require('@abandonware/noble');
 
 const peripheralName = 'BEYBLADE_TOOL01';
-const subCharacteristics = '55c4f002f8eb11ecb9390242ac120002';
-
+const subChar = '55c4f002f8eb11ecb9390242ac120002';
+const writeChar = '55c4f001f8eb11ecb9390242ac120002'
 const packets = [];
 let dataStream = [];
 let flushTimer = undefined;
@@ -48,21 +48,20 @@ noble.on('discover', async (peripheral) => {
         if (char.properties.includes('read')) {
           try {
             const data = await char.readAsync();
-            console.log(`     Read Value:     ${data.toString('hex').match(/../g).join(' ')}`);
+            console.log(`     Read Value:     ${Buffer.from(data.toString('hex'), 'hex').toString('utf8')}`);
           } catch (e) {
             console.log(`     Read Value:     Failed to read (${e.message})`);
           }
         }
 
-        if (char.uuid == subCharacteristics) {
-
+        if (char.uuid == subChar) {
           char.on('data', (data, isNotification) => {
             dataStream.push(data);
 
             clearTimeout(flushTimer)
             flushTimer = setTimeout(() => {
               const formattedDate = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
-              packets.push({[formattedDate]: dataStream});
+              packets.push({ [formattedDate]: dataStream });
               dataStream = [];
 
               processPayload();
@@ -70,10 +69,21 @@ noble.on('discover', async (peripheral) => {
           });
 
           await char.subscribeAsync();
-          console.log('subscribed!');
+          console.log('Subscribed!');
         }
+
+        // if (char.uuid == writeChar) {
+        //   console.log('found the write charact...');
+
+        //   setTimeout(() => {
+        //     console.log('asking for data...');
+        //     char.write(Buffer.from([0x75]), true);
+        //   }, 3000);
+        // }
       }
     }
+
+    console.log('nothing else on this device...');
   }
 
   // console.log('\n==========================================\n');
