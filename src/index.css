@@ -1,0 +1,34 @@
+/* ============================================================
+   DiZZi.02 — HUD layout
+   Design canvas is 1920 x 1080 (16:9). Everything inside .stage
+   is positioned as a % of that box, so the whole thing scales.
+   ============================================================ */
+
+:root {
+  --stage-w: 1920;
+  --stage-h: 1080;
+
+  --navy-0: #05060f;
+  --navy-1: #0a0c1c;
+  --navy-2: #10132b;
+  --grid-blue: #1f2ed8;
+  --grid-glow: #3b53ff;
+
+  --chrome-lo: #3a3f4a;
+  --chrome-mid: #6a7078;
+  --chrome-hi: #aab0b8;
+
+  --glass-blue-lo: #2b4a86;
+  --glass-blue-hi: #6f9bd8;
+  --accent-yellow: #f4c020;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  font-family: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace;
+  overflow: hidden;
+}

@@ -1,65 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DiZZi.02</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Share+Tech+Mono&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
-  <!-- The stage keeps a fixed 2000x1180 design ratio and scales to fit -->
-  <div class="stage">
-    <!-- glowing perspective grid -->
-    <div class="grid-bg" aria-hidden="true"></div>
-
-    <!-- HUD chrome -->
-    <div class="hud">
-      <!-- decorative panel behind the title / gauge / ai-tab (style only) -->
-      <div class="side-panel" aria-hidden="true"></div>
-
-      <!-- title -->
-      <div class="title-plate">
-        <div class="title-pill">
-          <span class="title-text">DiZZi<span class="dot">.</span><span class="ver">02</span></span>
-        </div>
-      </div>
-
-      <!-- little crosshair glyph -->
-      <div class="crosshair" aria-hidden="true">
-        <span></span><span></span>
-      </div>
-
-      <!-- ai interface tab -->
-      <div class="ai-tab">
-        <span class="ai-tab__big">ai</span>
-        <span class="ai-tab__small">INTERFACE</span>
-      </div>
-
-      <!-- circular gauge -->
-      <div class="gauge">
-        <div class="gauge-bezel">
-          <div class="gauge-ring">
-            <div class="gauge-lens">
-              <div class="flare"></div>
-            </div>
-          </div>
-          <div class="gauge-label gauge-label--top">100</div>
-          <div class="gauge-label gauge-label--bottom">100</div>
-        </div>
-      </div>
-
-      <!-- main panel: mount your React app into #app-root -->
-      <div class="main-panel">
-        <div id="app-root" class="app-root"></div>
-      </div>
-    </div>
-  </div>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 
 </html>
