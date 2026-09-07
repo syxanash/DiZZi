@@ -1,12 +1,12 @@
 /* ============================================================
    DiZZi.02 — HUD layout
-   Design canvas is 2000 x 1180. Everything inside .stage is
-   positioned as a % of that box, so the whole thing scales.
+   Design canvas is 1920 x 1080 (16:9). Everything inside .stage
+   is positioned as a % of that box, so the whole thing scales.
    ============================================================ */
 
 :root {
-  --stage-w: 2000;
-  --stage-h: 1180;
+  --stage-w: 1920;
+  --stage-h: 1080;
 
   --navy-0: #05060f;
   --navy-1: #0a0c1c;
@@ -223,7 +223,7 @@ html, body {
 .ai-tab {
   position: absolute;
   left: 14%;
-  top: 68%;
+  top: 70%;
   width: 14%;
   height: 14%;
   border-radius: 22px;
@@ -246,9 +246,10 @@ html, body {
   color: #9aa0a8;
   text-shadow: 0 2px 1px rgba(0, 0, 0, 0.6), 0 -1px 0 rgba(255, 255, 255, 0.25);
   line-height: 1;
+  transform: scaleX(3);
 }
 .ai-tab__small {
-  font-family: "Share Tech Mono", monospace;
+  font-family: "Orbitron", "Arial Black", sans-serif;
   font-size: clamp(7px, 1.1vw, 15px);
   letter-spacing: 0.3em;
   color: #868c95;
@@ -281,7 +282,7 @@ html, body {
   right: 3.5%;
   bottom: 9%;
   border-radius: 30px;
-  background: rgba(46, 48, 59, 0.55);
+  background: rgba(87, 90, 110, 0.55);
   border: 2px solid rgba(150, 170, 210, 0.35);
   box-shadow:
     inset 0 0 0 6px rgba(0, 0, 0, 0.25),
