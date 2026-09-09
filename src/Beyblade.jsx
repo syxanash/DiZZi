@@ -1,14 +1,22 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import './Beyblade.css';
 
 export default function Beyblade() {
+
+  const [speed, setSpeed] = useState(0.03);
+  const [camY, setCamY] = useState(0);
+  const [camZ, setCamZ] = useState(9);
+  const [tiltX, setTiltX] = useState(0.2);
+  const [gap, setGap] = useState(0.3);
+
+  const paramsRef = useRef({ speed, camY, camZ, tiltX, gap });
+
+  useEffect(() => {
+    paramsRef.current = { speed, camY, camZ, tiltX, gap };
+  }, [speed, camY, camZ, tiltX, gap]);
+
   const containerRef = useRef(null);
-  const speedRef = useRef(null);
-  const camYRef = useRef(null);
-  const camZRef = useRef(null);
-  const tiltXRef = useRef(null);
-  const gapRef = useRef(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -110,15 +118,16 @@ export default function Beyblade() {
     function animate() {
       frameId = requestAnimationFrame(animate);
 
-      // Apply Slider Values
-      camera.position.y = parseFloat(camYRef.current.value);
-      camera.position.z = parseFloat(camZRef.current.value);
+      // Apply state values (kept live via paramsRef mirror)
+      const { speed, camY, camZ, tiltX, gap } = paramsRef.current;
+
+      camera.position.y = camY;
+      camera.position.z = camZ;
       camera.lookAt(0, -0.5, 0);
 
-      beyblade.rotation.x = parseFloat(tiltXRef.current.value);
-      beyblade.rotation.y -= parseFloat(speedRef.current.value);
+      beyblade.rotation.x = tiltX;
+      beyblade.rotation.y -= speed;
 
-      const gap = parseFloat(gapRef.current.value);
       // FLUSH_OFFSET makes the groups sit flush when gap = 0:
       // flared piece bottom (0.7 - 0.35/2 = 0.525) meets ratchet top (0.1 + 0.45/2 = 0.325)
       const FLUSH_OFFSET = 0.2;
@@ -140,28 +149,58 @@ export default function Beyblade() {
     };
   }, []);
 
+  useEffect(
+    () => {
+      const t = setTimeout(() => setSpeed(0.10), 3000);
+
+      return () => {
+        clearTimeout(t);
+      };
+    },
+    []
+  );
+
   return (
     <div className="beyblade-viewer">
       <div className="beyblade-controls">
         <div className="control-group">
           <label>Speed:</label>
-          <input ref={speedRef} type="range" min="0" max="0.3" step="0.005" defaultValue="0.03" />
+          <input value={speed}
+            onChange={(e) => setSpeed(parseFloat(e.target.value))}
+            type="range"
+            min="0"
+            max="0.3" step="0.005" defaultValue="0.03" />
         </div>
         <div className="control-group">
           <label>View (Cam Y):</label>
-          <input ref={camYRef} type="range" min="-10" max="10" step="0.5" defaultValue="0" />
+          <input value={camY}
+            onChange={(e) => setCamY(parseFloat(e.target.value))}
+            type="range"
+            min="-10"
+            max="10" step="0.5" defaultValue="0" />
         </div>
         <div className="control-group">
           <label>Zoom (Cam Z):</label>
-          <input ref={camZRef} type="range" min="5" max="20" step="0.5" defaultValue="9" />
+          <input value={camZ}
+            onChange={(e) => setCamZ(parseFloat(e.target.value))}
+            type="range"
+            min="5"
+            max="20" step="0.5" defaultValue="9" />
         </div>
         <div className="control-group">
           <label>Tilt (X-Axis):</label>
-          <input ref={tiltXRef} type="range" min="-1.5" max="1.5" step="0.1" defaultValue="0.2" />
+          <input value={tiltX}
+            onChange={(e) => setTiltX(parseFloat(e.target.value))}
+            type="range"
+            min="-1." max="1.5" step="0.1" defaultValue="0.2" />
         </div>
         <div className="control-group">
           <label>Spacing Gap:</label>
-          <input ref={gapRef} type="range" min="0" max="1.5" step="0.1" defaultValue="0.3" />
+          <input value={gap}
+            onChange={(e) => setGap(parseFloat(e.target.value))}
+            type="range"
+            min="0"
+            max="1.5" step="0.1" defaultValue="0.3" />
         </div>
       </div>
 
