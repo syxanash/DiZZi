@@ -1,3 +1,3 @@
-# DiZZi 2.0
+# DiZZi 0.2
 
 LET IT RIP!

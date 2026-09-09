@@ -1,4 +1,5 @@
 import './App.css'
+import Beyblade from './Beyblade'
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
           </div>
 
           <div className="main-panel">
+            <Beyblade />
           </div>
         </div>
       </div>
