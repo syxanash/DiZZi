@@ -8,7 +8,7 @@ export default function Beyblade() {
   const [camY, setCamY] = useState(0);
   const [camZ, setCamZ] = useState(9);
   const [tiltX, setTiltX] = useState(0.2);
-  const [gap, setGap] = useState(0.3);
+  const [gap, setGap] = useState(1.5);
 
   const paramsRef = useRef({ speed, camY, camZ, tiltX, gap });
 
@@ -79,27 +79,28 @@ export default function Beyblade() {
     }
 
     // 1. Lock Chip & Blade (Top Group)
-    createPart(groupTop, new THREE.CylinderGeometry(0.6, 0.6, 0.15, 16), 1.35, coloredMaterial(0x124e78));
+    createPart(groupTop, new THREE.CylinderGeometry(0.4, 0.4, 0.15, 16), 1.35, coloredMaterial(0x124e78));
+
     const blade = createPart(
       groupTop,
-      new THREE.CylinderGeometry(2.2, 2.4, 0.4, 8),
+      new THREE.CylinderGeometry(1.6, 1.8, 0.4, 8),
       1.075,
       coloredMaterial(0xa7c7e7),
     );
 
     // White inset circle on the blade's top face (a bit bigger than the lock chip's 0.6 radius)
-    addTopDisc(blade, 1.5, 0xc9764c);
+    addTopDisc(blade, 1.2, 0xc9764c);
 
     // Flared piece: y = 0.7 so its top face (0.7 + 0.35/2 = 0.875) meets the blade's bottom face (1.075 - 0.4/2 = 0.875)
-    createPart(groupTop, new THREE.CylinderGeometry(2.4, 2.1, 0.35, 8), 0.7, coloredMaterial(0x6f8faf));
+    createPart(groupTop, new THREE.CylinderGeometry(1.8, 1.6, 0.35, 8), 0.7, coloredMaterial(0x6f8faf));
 
     // 2. Ratchet (Middle Group) - Base Y is 0.1
-    createPart(groupRatchet, new THREE.CylinderGeometry(1.8, 1.8, 0.45, 12), 0.1, coloredMaterial(0xccccff));
+    createPart(groupRatchet, new THREE.CylinderGeometry(1.4, 1.4, 0.45, 12), 0.1, coloredMaterial(0x8080ff));
 
     // 3. Bit (Bottom Group) - Base Y starts at -0.325
-    createPart(groupBit, new THREE.CylinderGeometry(1.1, 1.1, 0.25, 16), -0.25, coloredMaterial(0x9fe2bf));
-    createPart(groupBit, new THREE.CylinderGeometry(1.1, 0.35, 0.5, 16), -0.625, coloredMaterial(0x9fe2bf));
-    createPart(groupBit, new THREE.CylinderGeometry(0.25, 0.1, 0.35, 16), -1.05);
+    createPart(groupBit, new THREE.CylinderGeometry(0.5, 0.5, 0.25, 16), -0.25, coloredMaterial(0x9fe2bf));
+    createPart(groupBit, new THREE.CylinderGeometry(0.4, 0.32, 0.5, 16), -0.625, coloredMaterial(0x9fe2bf));
+    createPart(groupBit, new THREE.CylinderGeometry(0.25, 0.01, 0.35, 16), -1.05, coloredMaterial(0x9fe2bf));
 
     // Resize Observer makes it scale perfectly inside any div you drop it in
     const resizeObserver = new ResizeObserver((entries) => {
@@ -169,7 +170,7 @@ export default function Beyblade() {
           onChange={(e) => setSpeed(parseFloat(e.target.value))}
           type="range"
           min="0"
-          max="0.3" step="0.005" defaultValue="0.03" />
+          max="0.3" step="0.005" />
       </div>
       <div className="control-group">
         <label>View (Cam Y):</label>
@@ -177,7 +178,7 @@ export default function Beyblade() {
           onChange={(e) => setCamY(parseFloat(e.target.value))}
           type="range"
           min="-10"
-          max="10" step="0.5" defaultValue="0" />
+          max="10" step="0.5" />
       </div>
       <div className="control-group">
         <label>Zoom (Cam Z):</label>
@@ -185,14 +186,14 @@ export default function Beyblade() {
           onChange={(e) => setCamZ(parseFloat(e.target.value))}
           type="range"
           min="5"
-          max="20" step="0.5" defaultValue="9" />
+          max="20" step="0.5" />
       </div>
       <div className="control-group">
         <label>Tilt (X-Axis):</label>
         <input value={tiltX}
           onChange={(e) => setTiltX(parseFloat(e.target.value))}
           type="range"
-          min="-1." max="1.5" step="0.1" defaultValue="0.2" />
+          min="-1." max="1.5" step="0.1" />
       </div>
       <div className="control-group">
         <label>Spacing Gap:</label>
@@ -200,14 +201,14 @@ export default function Beyblade() {
           onChange={(e) => setGap(parseFloat(e.target.value))}
           type="range"
           min="0"
-          max="1.5" step="0.1" defaultValue="0.3" />
+          max="1.5" step="0.1" />
       </div>
     </div>
   }
 
   return (
     <div className="beyblade-viewer">
-      {/* {renderControls()} */}
+      {renderControls()}
       <div className="beyblade-canvas-container" ref={containerRef} />
     </div>
   );
