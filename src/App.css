@@ -21,8 +21,9 @@
   opacity: 0.55;
   /* darken the middle so the grid reads as a glowing floor/edge */
   -webkit-mask-image: radial-gradient(90% 90% at 50% 48%, transparent 18%, #000 78%);
-          mask-image: radial-gradient(90% 90% at 50% 48%, transparent 18%, #000 78%);
+  mask-image: radial-gradient(90% 90% at 50% 48%, transparent 18%, #000 78%);
 }
+
 .grid-bg::after {
   /* subtle brighter edge bloom */
   content: "";
@@ -92,8 +93,14 @@
     0 2px 0 #7a5c00,
     0 0 14px rgba(244, 192, 32, 0.5);
 }
-.title-text .dot { color: var(--accent-yellow); }
-.title-text .ver { font-size: 0.62em; }
+
+.title-text .dot {
+  color: var(--accent-yellow);
+}
+
+.title-text .ver {
+  font-size: 0.62em;
+}
 
 /* ---------- Crosshair glyph ---------- */
 .crosshair {
@@ -107,12 +114,21 @@
   box-shadow: 0 0 8px rgba(111, 155, 216, 0.8);
   z-index: 5;
 }
+
 .crosshair span {
   position: absolute;
   background: var(--glass-blue-hi);
 }
-.crosshair span:first-child { inset: 45% 12% auto 12%; height: 2px; }
-.crosshair span:last-child  { inset: 12% 45% 12% auto; width: 2px; }
+
+.crosshair span:first-child {
+  inset: 45% 12% auto 12%;
+  height: 2px;
+}
+
+.crosshair span:last-child {
+  inset: 12% 45% 12% auto;
+  width: 2px;
+}
 
 /* ---------- Circular gauge ---------- */
 .gauge {
@@ -181,8 +197,14 @@
   color: #c8d2e0;
   text-shadow: 0 0 8px rgba(150, 180, 220, 0.7);
 }
-.gauge-label--top { top: 11%; }
-.gauge-label--bottom { bottom: 11%; }
+
+.gauge-label--top {
+  top: 11%;
+}
+
+.gauge-label--bottom {
+  bottom: 11%;
+}
 
 /* ---------- ai INTERFACE tab ---------- */
 .ai-tab {
@@ -204,6 +226,7 @@
   justify-content: center;
   z-index: 6;
 }
+
 .ai-tab__big {
   font-family: "Orbitron", "Arial Black", sans-serif;
   font-weight: 800;
@@ -213,6 +236,7 @@
   line-height: 1;
   transform: scaleX(3);
 }
+
 .ai-tab__small {
   font-family: "Orbitron", "Arial Black", sans-serif;
   font-size: clamp(7px, 1.1vw, 15px);
@@ -256,4 +280,16 @@
   backdrop-filter: blur(2px);
   z-index: 3;
   overflow: hidden;
+}
+
+.layout-row {
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+  height: 100%;
+}
+
+.beyblade-side {
+  flex: 1 1 50%;
+  min-width: 0;
 }

@@ -1,5 +1,6 @@
-import './App.css'
-import Beyblade from './Beyblade'
+import './App.css';
+import Beyblade from './Beyblade';
+import InfoPanel from './InfoPanel';
 
 function App() {
   return (
@@ -45,7 +46,12 @@ function App() {
           </div>
 
           <div className="main-panel">
-            <Beyblade />
+            <div className="layout-row">
+              <div className="beyblade-side">
+                <Beyblade />
+              </div>
+              <InfoPanel />
+            </div>
           </div>
         </div>
       </div>

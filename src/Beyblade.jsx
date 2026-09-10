@@ -151,59 +151,63 @@ export default function Beyblade() {
 
   useEffect(
     () => {
-      const t = setTimeout(() => setSpeed(0.10), 3000);
+      // setCamZ(5);
+      // const t = setTimeout(() => setSpeed(0.10), 3000);
 
-      return () => {
-        clearTimeout(t);
-      };
+      // return () => {
+      //   clearTimeout(t);
+      // };
     },
     []
   );
 
+  const renderControls = () => {
+    return <div className="beyblade-controls">
+      <div className="control-group">
+        <label>Speed:</label>
+        <input value={speed}
+          onChange={(e) => setSpeed(parseFloat(e.target.value))}
+          type="range"
+          min="0"
+          max="0.3" step="0.005" defaultValue="0.03" />
+      </div>
+      <div className="control-group">
+        <label>View (Cam Y):</label>
+        <input value={camY}
+          onChange={(e) => setCamY(parseFloat(e.target.value))}
+          type="range"
+          min="-10"
+          max="10" step="0.5" defaultValue="0" />
+      </div>
+      <div className="control-group">
+        <label>Zoom (Cam Z):</label>
+        <input value={camZ}
+          onChange={(e) => setCamZ(parseFloat(e.target.value))}
+          type="range"
+          min="5"
+          max="20" step="0.5" defaultValue="9" />
+      </div>
+      <div className="control-group">
+        <label>Tilt (X-Axis):</label>
+        <input value={tiltX}
+          onChange={(e) => setTiltX(parseFloat(e.target.value))}
+          type="range"
+          min="-1." max="1.5" step="0.1" defaultValue="0.2" />
+      </div>
+      <div className="control-group">
+        <label>Spacing Gap:</label>
+        <input value={gap}
+          onChange={(e) => setGap(parseFloat(e.target.value))}
+          type="range"
+          min="0"
+          max="1.5" step="0.1" defaultValue="0.3" />
+      </div>
+    </div>
+  }
+
   return (
     <div className="beyblade-viewer">
-      <div className="beyblade-controls">
-        <div className="control-group">
-          <label>Speed:</label>
-          <input value={speed}
-            onChange={(e) => setSpeed(parseFloat(e.target.value))}
-            type="range"
-            min="0"
-            max="0.3" step="0.005" defaultValue="0.03" />
-        </div>
-        <div className="control-group">
-          <label>View (Cam Y):</label>
-          <input value={camY}
-            onChange={(e) => setCamY(parseFloat(e.target.value))}
-            type="range"
-            min="-10"
-            max="10" step="0.5" defaultValue="0" />
-        </div>
-        <div className="control-group">
-          <label>Zoom (Cam Z):</label>
-          <input value={camZ}
-            onChange={(e) => setCamZ(parseFloat(e.target.value))}
-            type="range"
-            min="5"
-            max="20" step="0.5" defaultValue="9" />
-        </div>
-        <div className="control-group">
-          <label>Tilt (X-Axis):</label>
-          <input value={tiltX}
-            onChange={(e) => setTiltX(parseFloat(e.target.value))}
-            type="range"
-            min="-1." max="1.5" step="0.1" defaultValue="0.2" />
-        </div>
-        <div className="control-group">
-          <label>Spacing Gap:</label>
-          <input value={gap}
-            onChange={(e) => setGap(parseFloat(e.target.value))}
-            type="range"
-            min="0"
-            max="1.5" step="0.1" defaultValue="0.3" />
-        </div>
-      </div>
-
+      {/* {renderControls()} */}
       <div className="beyblade-canvas-container" ref={containerRef} />
     </div>
   );
