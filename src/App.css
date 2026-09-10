@@ -16,16 +16,23 @@
   background-image:
     linear-gradient(var(--grid-blue) 2px, transparent 2px),
     linear-gradient(90deg, var(--grid-blue) 2px, transparent 2px);
-  background-size: 4.6% 7.5%, 4.6% 7.5%;
+  background-size: 64px 64px, 64px 64px;
   filter: drop-shadow(0 0 3px var(--grid-glow));
   opacity: 0.55;
-  /* darken the middle so the grid reads as a glowing floor/edge */
-  -webkit-mask-image: radial-gradient(90% 90% at 50% 48%, transparent 18%, #000 78%);
-  mask-image: radial-gradient(90% 90% at 50% 48%, transparent 18%, #000 78%);
+  /* infinite oblique flow, top-left -> bottom-right */
+  animation: grid-flow 5s linear infinite;
+}
+
+@keyframes grid-flow {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 64px 64px, 64px 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-bg { animation: none; }
 }
 
 .grid-bg::after {
-  /* subtle brighter edge bloom */
   content: "";
   position: absolute;
   inset: 0;
@@ -271,7 +278,7 @@
   right: 3.5%;
   bottom: 9%;
   border-radius: 30px;
-  background: rgba(87, 90, 110, 0.55);
+  background: rgba(87, 90, 110, 0.87);
   border: 2px solid rgba(150, 170, 210, 0.35);
   box-shadow:
     inset 0 0 0 6px rgba(0, 0, 0, 0.25),

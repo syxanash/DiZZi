@@ -1,6 +1,7 @@
 .info-panel {
   flex: 1 1 50%;
   display: flex;
+  color: white;
   flex-direction: column;
   justify-content: center;
   /* vertical center */
