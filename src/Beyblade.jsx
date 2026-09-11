@@ -280,10 +280,25 @@ export default function Beyblade({ status }) {
     </div>
   );
 
+  async function playTTS(text) {
+    const res = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) throw new Error(`TTS failed: ${res.status}`);
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.play();
+    audio.onended = () => URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="beyblade-viewer">
       {/* {renderControls()} */}
-      <div className="beyblade-canvas-container" ref={containerRef} />
+      <div className="beyblade-canvas-container" onClick={() => playTTS('Hello Seemownay')} ref={containerRef} />
     </div>
   );
 }
