@@ -2,8 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import './Beyblade.css';
 
-export default function Beyblade() {
+const STATUS_TARGETS = {
+  idle: { speed: 0.03, camY: 0, camZ: 7, tiltX: 0.2, lean: 0, gap: 1.5 },
+  disconnected: { speed: 0, camY: 0, camZ: 7, tiltX: 0.2, lean: 0, gap: 1.5 },
+  attached: { speed: 0, camY: 0, camZ: 7, tiltX: 0.2, lean: 0, gap: 0 },
+  spin_fast: { speed: 0.3, camY: -2, camZ: 7, tiltX: 0.3, lean: 0.6, gap: 0 },
+  spin_slow: { speed: 0.09, camY: 2, camZ: 7, tiltX: 0.2, lean: 0.4, gap: 0 },
+  dropped: { speed: 0, camY: -6, camZ: 7, tiltX: 0.2, lean: 0, gap: 0 },
+};
 
+export default function Beyblade({ status }) {
   const [speed, setSpeed] = useState(0.03);
   const [camY, setCamY] = useState(0);
   const [camZ, setCamZ] = useState(9);
@@ -11,33 +19,52 @@ export default function Beyblade() {
   const [lean, setLean] = useState(0);
   const [gap, setGap] = useState(1.5);
 
-  const paramsRef = useRef({ speed, camY, camZ, tiltX, lean, gap });
+  const containerRef = useRef(null);
+
+  const animValues = useRef({
+    speed: 0.03,
+    camY: 0,
+    camZ: 7,
+    tiltX: 0.2,
+    lean: 0,
+    gap: 1.5,
+    dropProgress: 0,
+  });
+
+  const isManualMode = useRef(false);
 
   useEffect(() => {
-    paramsRef.current = { speed, camY, camZ, tiltX, lean, gap };
-  }, [speed, camY, camZ, tiltX, lean, gap]);
+    if (STATUS_TARGETS[status]) {
+      const target = STATUS_TARGETS[status];
+      setSpeed(target.speed);
+      setCamY(target.camY);
+      setCamZ(target.camZ);
+      setTiltX(target.tiltX);
+      setLean(target.lean);
+      setGap(target.gap);
+      if (status === 'dropped') animValues.current.dropProgress = 0;
+      isManualMode.current = false;
+    }
+  }, [status]);
 
-  const containerRef = useRef(null);
+  const targetsRef = useRef({ speed, camY, camZ, tiltX, lean, gap });
+  useEffect(() => {
+    targetsRef.current = { speed, camY, camZ, tiltX, lean, gap };
+  }, [speed, camY, camZ, tiltX, lean, gap]);
 
   useEffect(() => {
     const container = containerRef.current;
     const scene = new THREE.Scene();
-
-    // Initialize camera with dummy aspect ratio (updated by ResizeObserver)
     const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     container.appendChild(renderer.domElement);
 
-    // Main parent group
     const beyblade = new THREE.Group();
-
-    // Pivot placed at the tip each frame, so leaning rotates about the tip
     const pivot = new THREE.Group();
     scene.add(pivot);
     pivot.add(beyblade);
 
-    // Sub-groups so we can space them out easily
     const groupTop = new THREE.Group();
     const groupRatchet = new THREE.Group();
     const groupBit = new THREE.Group();
@@ -46,7 +73,6 @@ export default function Beyblade() {
     beyblade.add(groupRatchet);
     beyblade.add(groupBit);
 
-    // Materials
     const solidMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       polygonOffset: true,
@@ -72,12 +98,11 @@ export default function Beyblade() {
       return mesh;
     }
 
-    // Adds a flat disc onto the top face of a part, as a child so it follows the part's transform
     function addTopDisc(parentMesh, radius, color) {
       const halfHeight = parentMesh.geometry.parameters.height / 2;
       const disc = new THREE.Mesh(new THREE.CircleGeometry(radius, 32), coloredMaterial(color));
       disc.rotation.x = -Math.PI / 2;
-      disc.position.y = halfHeight + 0.001; // just above the parent's top face, in local coords
+      disc.position.y = halfHeight + 0.001;
       disc.add(new THREE.LineSegments(new THREE.EdgesGeometry(disc.geometry), outlineMaterial));
       parentMesh.add(disc);
       return disc;
@@ -85,15 +110,7 @@ export default function Beyblade() {
 
     // 1. Lock Chip & Blade (Top Group)
     createPart(groupTop, new THREE.CylinderGeometry(0.4, 0.4, 0.15, 16), 1.35, coloredMaterial(0x124e78));
-
-    const blade = createPart(
-      groupTop,
-      new THREE.CylinderGeometry(1.6, 1.8, 0.4, 8),
-      1.075,
-      coloredMaterial(0xa7c7e7),
-    );
-
-    // White inset circle on the blade's top face (a bit bigger than the lock chip's 0.6 radius)
+    const blade = createPart(groupTop, new THREE.CylinderGeometry(1.6, 1.8, 0.4, 8), 1.075, coloredMaterial(0xa7c7e7));
     addTopDisc(blade, 1.2, 0xc9764c);
 
     // Flared piece: y = 0.7 so its top face (0.7 + 0.35/2 = 0.875) meets the blade's bottom face (1.075 - 0.4/2 = 0.875)
@@ -107,11 +124,9 @@ export default function Beyblade() {
     createPart(groupBit, new THREE.CylinderGeometry(0.4, 0.32, 0.5, 16), -0.625, coloredMaterial(0x9fe2bf));
     createPart(groupBit, new THREE.CylinderGeometry(0.25, 0.01, 0.35, 16), -1.05, coloredMaterial(0x9fe2bf));
 
-    // Resize Observer makes it scale perfectly inside any div you drop it in
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const width = entry.contentRect.width;
-        const height = entry.contentRect.height;
+        const { width, height } = entry.contentRect;
         renderer.setSize(width, height);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
@@ -119,34 +134,59 @@ export default function Beyblade() {
     });
     resizeObserver.observe(container);
 
-    // Animation Loop
     let frameId;
+    let clock = new THREE.Clock();
+
     function animate() {
       frameId = requestAnimationFrame(animate);
 
-      // Apply state values (kept live via paramsRef mirror)
-      const { speed, camY, camZ, tiltX, lean, gap } = paramsRef.current;
+      const delta = clock.getDelta();
+      const lerpFactor = THREE.MathUtils.clamp(delta * 5, 0, 1); // Framerate-independent smoothing
+      const targets = targetsRef.current;
+      const current = animValues.current;
 
-      camera.position.y = camY;
-      camera.position.z = camZ;
+      if (isManualMode.current) {
+        // Direct assignment when interacting with UI sliders
+        Object.assign(current, targets);
+      } else {
+        // Smooth transition towards targets
+        current.speed = THREE.MathUtils.lerp(current.speed, targets.speed, lerpFactor);
+        current.camY = THREE.MathUtils.lerp(current.camY, targets.camY, lerpFactor);
+        current.camZ = THREE.MathUtils.lerp(current.camZ, targets.camZ, lerpFactor);
+        current.tiltX = THREE.MathUtils.lerp(current.tiltX, targets.tiltX, lerpFactor);
+        current.gap = THREE.MathUtils.lerp(current.gap, targets.gap, lerpFactor);
+
+        // Handle lean dynamics for status animations
+        if (status === 'dropped') {
+          current.dropProgress += delta * 18;
+          const totalDuration = Math.PI * 4;
+          if (current.dropProgress < totalDuration) {
+            const amplitude = 0.5 * (1 - current.dropProgress / totalDuration);
+            current.lean = -Math.sin(current.dropProgress) * amplitude;
+          } else {
+            current.lean = THREE.MathUtils.lerp(current.lean, 0, lerpFactor);
+          }
+        } else {
+          current.lean = THREE.MathUtils.lerp(current.lean, targets.lean, lerpFactor);
+        }
+      }
+
+      // Apply animated parameters to Three.js scene
+      camera.position.y = current.camY;
+      camera.position.z = current.camZ;
       camera.lookAt(0, -0.5, 0);
 
-      // Tip position in beyblade-local Y (same math as groupBit below).
-      // Place the pivot there and counter-offset the beyblade so nothing
-      // moves at lean = 0, then lean rotates about the planted tip.
-      const TIP_Y = -1.025 - gap * 2;
+      const TIP_Y = -1.025 - current.gap * 2;
       pivot.position.y = TIP_Y;
       beyblade.position.y = -TIP_Y;
 
-      pivot.rotation.z = lean;
-      beyblade.rotation.x = tiltX;
-      beyblade.rotation.y -= speed;
+      pivot.rotation.z = current.lean;
+      beyblade.rotation.x = current.tiltX;
+      beyblade.rotation.y -= current.speed;
 
-      // FLUSH_OFFSET makes the groups sit flush when gap = 0:
-      // flared piece bottom (0.7 - 0.35/2 = 0.525) meets ratchet top (0.1 + 0.45/2 = 0.325)
       const FLUSH_OFFSET = 0.2;
-      groupRatchet.position.y = FLUSH_OFFSET - gap;
-      groupBit.position.y = FLUSH_OFFSET - gap * 2;
+      groupRatchet.position.y = FLUSH_OFFSET - current.gap;
+      groupBit.position.y = FLUSH_OFFSET - current.gap * 2;
 
       renderer.render(scene, camera);
     }
@@ -161,74 +201,87 @@ export default function Beyblade() {
         container.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [status]);
 
-  useEffect(
-    () => {
-      // setCamZ(5);
-      // const t = setTimeout(() => setSpeed(0.10), 3000);
+  const handleSliderChange = (setter, value) => {
+    isManualMode.current = true;
+    setter(value);
+  };
 
-      // return () => {
-      //   clearTimeout(t);
-      // };
-    },
-    []
-  );
-
-  const renderControls = () => {
-    return <div className="beyblade-controls">
+  const renderControls = () => (
+    <div className="beyblade-controls">
       <div className="control-group">
         <label>Speed:</label>
-        <input value={speed}
-          onChange={(e) => setSpeed(parseFloat(e.target.value))}
+        <input
+          value={speed}
+          onChange={(e) => handleSliderChange(setSpeed, parseFloat(e.target.value))}
           type="range"
           min="0"
-          max="0.3" step="0.005" />
+          max="0.3"
+          step="0.005"
+        />
       </div>
       <div className="control-group">
         <label>View (Cam Y):</label>
-        <input value={camY}
-          onChange={(e) => setCamY(parseFloat(e.target.value))}
+        <input
+          value={camY}
+          onChange={(e) => handleSliderChange(setCamY, parseFloat(e.target.value))}
           type="range"
           min="-10"
-          max="10" step="0.5" />
+          max="10"
+          step="0.5"
+        />
       </div>
       <div className="control-group">
         <label>Zoom (Cam Z):</label>
-        <input value={camZ}
-          onChange={(e) => setCamZ(parseFloat(e.target.value))}
+        <input
+          value={camZ}
+          onChange={(e) => handleSliderChange(setCamZ, parseFloat(e.target.value))}
           type="range"
           min="5"
-          max="20" step="0.5" />
+          max="20"
+          step="0.5"
+        />
       </div>
       <div className="control-group">
         <label>Tilt (X-Axis):</label>
-        <input value={tiltX}
-          onChange={(e) => setTiltX(parseFloat(e.target.value))}
+        <input
+          value={tiltX}
+          onChange={(e) => handleSliderChange(setTiltX, parseFloat(e.target.value))}
           type="range"
-          min="-1." max="1.5" step="0.1" />
+          min="-1.0"
+          max="1.5"
+          step="0.1"
+        />
       </div>
       <div className="control-group">
         <label>Lean (left):</label>
-        <input value={lean}
-          onChange={(e) => setLean(parseFloat(e.target.value))}
+        <input
+          value={lean}
+          onChange={(e) => handleSliderChange(setLean, parseFloat(e.target.value))}
           type="range"
-          min="-0.6" max="0.6" step="0.02" />
+          min="-0.6"
+          max="0.6"
+          step="0.02"
+        />
       </div>
       <div className="control-group">
         <label>Spacing Gap:</label>
-        <input value={gap}
-          onChange={(e) => setGap(parseFloat(e.target.value))}
+        <input
+          value={gap}
+          onChange={(e) => handleSliderChange(setGap, parseFloat(e.target.value))}
           type="range"
           min="0"
-          max="1.5" step="0.1" />
+          max="1.5"
+          step="0.1"
+        />
       </div>
-    </div>;
-  };
+    </div>
+  );
 
   return (
     <div className="beyblade-viewer">
-      {renderControls()}
+      {/* {renderControls()} */}
       <div className="beyblade-canvas-container" ref={containerRef} />
     </div>
   );

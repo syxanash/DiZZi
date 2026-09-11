@@ -1,8 +1,31 @@
+import { useState, useEffect } from 'react';
 import './App.css';
 import Beyblade from './Beyblade';
 import InfoPanel from './InfoPanel';
 
 function App() {
+  const [ beyStatus, setBeyStatus ] = useState('idle');
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setBeyStatus('attached');
+    }, 1000);
+
+    const t2 = setTimeout(() => {
+      setBeyStatus('spin_fast');
+    }, 2000);
+
+    const t3 = setTimeout(() => {
+      setBeyStatus('attached');
+    }, 6000);
+
+    return () => {
+      clearTimeout(t);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, []);
+
   return (
     <>
       <div className="stage">
@@ -48,7 +71,7 @@ function App() {
           <div className="main-panel">
             <div className="layout-row">
               <div className="beyblade-side">
-                <Beyblade />
+                <Beyblade status={beyStatus}/>
               </div>
               <InfoPanel />
             </div>
