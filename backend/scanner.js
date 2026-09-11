@@ -20,14 +20,13 @@ export function startBluetooth() {
   noble.on('stateChange', state => {
     console.log('Bluetooth state:', state);
     if (state === 'poweredOn') {
-      noble.startScanning([], false); // false = no duplicates
+      noble.startScanning([], false);
     }
   });
 
   noble.on('discover', async (peripheral) => {
     const name = peripheral.advertisement.localName;
 
-    // Skip unnamed devices
     if (!name) return;
 
     console.log(`Found: ${name} | RSSI: ${peripheral.rssi}`);
@@ -41,7 +40,7 @@ export function startBluetooth() {
       bleEvents.emit('status', 'connected');
 
       peripheral.once('disconnect', () => {
-        console.log(`${peripheralName} disconnected...`);
+        console.log(`Bluetooth ${peripheralName} disconnected...`);
         bleEvents.emit('status', 'disconnected');
 
         noble.startScanningAsync([], false);
@@ -83,7 +82,7 @@ export function startBluetooth() {
             });
 
             await char.subscribeAsync();
-            console.log('Subscribed!');
+            console.log(`Subscribed to: ${subChar}`);
           }
 
           // if (char.uuid == writeChar) {
@@ -96,8 +95,6 @@ export function startBluetooth() {
           // }
         }
       }
-
-      console.log('nothing else on this device...');
     }
 
     // console.log('\n==========================================\n');
