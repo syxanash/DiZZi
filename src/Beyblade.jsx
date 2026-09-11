@@ -12,6 +12,7 @@ const STATUS_TARGETS = {
 };
 
 export default function Beyblade({ status }) {
+
   const [speed, setSpeed] = useState(0.03);
   const [camY, setCamY] = useState(0);
   const [camZ, setCamZ] = useState(9);
@@ -81,7 +82,7 @@ export default function Beyblade({ status }) {
     });
     const coloredMaterial = (color) =>
       new THREE.MeshBasicMaterial({
-        color,
+        color: status === 'disconnected' ? 0x808080 : color,
         polygonOffset: true,
         polygonOffsetFactor: 1,
         polygonOffsetUnits: 1,

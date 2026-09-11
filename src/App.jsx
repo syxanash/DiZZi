@@ -4,7 +4,7 @@ import Beyblade from './Beyblade';
 import InfoPanel from './InfoPanel';
 
 function App() {
-  const [ beyStatus, setBeyStatus ] = useState('idle');
+  const [beyStatus, setBeyStatus] = useState('idle');
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -16,7 +16,7 @@ function App() {
     }, 2000);
 
     const t3 = setTimeout(() => {
-      setBeyStatus('attached');
+      setBeyStatus('disconnected');
     }, 6000);
 
     return () => {
@@ -71,7 +71,7 @@ function App() {
           <div className="main-panel">
             <div className="layout-row">
               <div className="beyblade-side">
-                <Beyblade status={beyStatus}/>
+                <Beyblade status={beyStatus} />
               </div>
               <InfoPanel />
             </div>
