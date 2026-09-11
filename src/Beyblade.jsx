@@ -223,8 +223,8 @@ export default function Beyblade() {
           min="0"
           max="1.5" step="0.1" />
       </div>
-    </div>
-  }
+    </div>;
+  };
 
   return (
     <div className="beyblade-viewer">

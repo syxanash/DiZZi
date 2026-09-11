@@ -22,7 +22,7 @@ function broadcast(obj) {
 wss.on('connection', (socket) => {
   console.log('client connected total: ', wss.clients.size);
   socket.on('close', () => console.log('client left, total: ', wss.clients.size));
-})
+});
 
 bleEvents.on('packet', (payload) => {
   broadcast({ type: 'packet', payload });

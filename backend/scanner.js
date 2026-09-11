@@ -12,7 +12,7 @@ export function startBluetooth() {
   let flushTimer = undefined;
 
   function processPayload(payload) {
-    console.log('===== PROCESSED PAYLOADS ======')
+    console.log('===== PROCESSED PAYLOADS ======');
     console.log(payload);
     bleEvents.emit('packet', payload);
   }
@@ -68,10 +68,10 @@ export function startBluetooth() {
           }
 
           if (char.uuid == subChar) {
-            char.on('data', (data, isNotification) => {
+            char.on('data', (data) => {
               dataStream.push(data);
 
-              clearTimeout(flushTimer)
+              clearTimeout(flushTimer);
               flushTimer = setTimeout(() => {
                 const formattedDate = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
                 const payload = {[formattedDate]: dataStream };
