@@ -8,13 +8,14 @@ export default function Beyblade() {
   const [camY, setCamY] = useState(0);
   const [camZ, setCamZ] = useState(9);
   const [tiltX, setTiltX] = useState(0.2);
+  const [lean, setLean] = useState(0);
   const [gap, setGap] = useState(1.5);
 
-  const paramsRef = useRef({ speed, camY, camZ, tiltX, gap });
+  const paramsRef = useRef({ speed, camY, camZ, tiltX, lean, gap });
 
   useEffect(() => {
-    paramsRef.current = { speed, camY, camZ, tiltX, gap };
-  }, [speed, camY, camZ, tiltX, gap]);
+    paramsRef.current = { speed, camY, camZ, tiltX, lean, gap };
+  }, [speed, camY, camZ, tiltX, lean, gap]);
 
   const containerRef = useRef(null);
 
@@ -30,7 +31,11 @@ export default function Beyblade() {
 
     // Main parent group
     const beyblade = new THREE.Group();
-    scene.add(beyblade);
+
+    // Pivot placed at the tip each frame, so leaning rotates about the tip
+    const pivot = new THREE.Group();
+    scene.add(pivot);
+    pivot.add(beyblade);
 
     // Sub-groups so we can space them out easily
     const groupTop = new THREE.Group();
@@ -120,12 +125,20 @@ export default function Beyblade() {
       frameId = requestAnimationFrame(animate);
 
       // Apply state values (kept live via paramsRef mirror)
-      const { speed, camY, camZ, tiltX, gap } = paramsRef.current;
+      const { speed, camY, camZ, tiltX, lean, gap } = paramsRef.current;
 
       camera.position.y = camY;
       camera.position.z = camZ;
       camera.lookAt(0, -0.5, 0);
 
+      // Tip position in beyblade-local Y (same math as groupBit below).
+      // Place the pivot there and counter-offset the beyblade so nothing
+      // moves at lean = 0, then lean rotates about the planted tip.
+      const TIP_Y = -1.025 - gap * 2;
+      pivot.position.y = TIP_Y;
+      beyblade.position.y = -TIP_Y;
+
+      pivot.rotation.z = lean;
       beyblade.rotation.x = tiltX;
       beyblade.rotation.y -= speed;
 
@@ -194,6 +207,13 @@ export default function Beyblade() {
           onChange={(e) => setTiltX(parseFloat(e.target.value))}
           type="range"
           min="-1." max="1.5" step="0.1" />
+      </div>
+      <div className="control-group">
+        <label>Lean (left):</label>
+        <input value={lean}
+          onChange={(e) => setLean(parseFloat(e.target.value))}
+          type="range"
+          min="-0.6" max="0.6" step="0.02" />
       </div>
       <div className="control-group">
         <label>Spacing Gap:</label>
