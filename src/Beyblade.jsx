@@ -298,7 +298,7 @@ export default function Beyblade({ status }) {
   return (
     <div className="beyblade-viewer">
       {/* {renderControls()} */}
-      <div className="beyblade-canvas-container" onClick={() => playTTS('Hello Seemownay')} ref={containerRef} />
+      <div className="beyblade-canvas-container" ref={containerRef} />
     </div>
   );
 }

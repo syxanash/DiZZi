@@ -19,10 +19,15 @@ function App() {
       setBeyStatus('disconnected');
     }, 6000);
 
+    const t4 = setTimeout(() => {
+      setBeyStatus('idle');
+    }, 8000);
+
     return () => {
       clearTimeout(t);
       clearTimeout(t2);
       clearTimeout(t3);
+      clearTimeout(t4);
     };
   }, []);
 
@@ -73,7 +78,16 @@ function App() {
               <div className="beyblade-side">
                 <Beyblade status={beyStatus} />
               </div>
-              <InfoPanel />
+              <div className="window-frame">
+                <div className="window-titlebar">
+                  <span>_</span>
+                  <span>□</span>
+                  <span>X</span>
+                </div>
+                <div className="window-body">
+                  <InfoPanel />
+                </div>
+              </div>
             </div>
           </div>
         </div>
