@@ -33,6 +33,8 @@ export default function Beyblade({ status }) {
   });
 
   const isManualMode = useRef(false);
+  const coloredMaterials = useRef([]);
+  const statusRef = useRef(status);
 
   useEffect(() => {
     if (STATUS_TARGETS[status]) {
@@ -74,19 +76,24 @@ export default function Beyblade({ status }) {
     beyblade.add(groupRatchet);
     beyblade.add(groupBit);
 
+    coloredMaterials.current = [];
+
     const solidMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       polygonOffset: true,
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1,
     });
-    const coloredMaterial = (color) =>
-      new THREE.MeshBasicMaterial({
-        color: status === 'disconnected' ? 0x808080 : color,
+    const coloredMaterial = (color) => {
+      const material = new THREE.MeshBasicMaterial({
+        color,
         polygonOffset: true,
         polygonOffsetFactor: 1,
         polygonOffsetUnits: 1,
       });
+      coloredMaterials.current.push({ material, baseColor: color });
+      return material;
+    };
     const outlineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
 
     function createPart(parentGroup, geometry, yPosition, material = solidMaterial) {
@@ -158,7 +165,7 @@ export default function Beyblade({ status }) {
         current.gap = THREE.MathUtils.lerp(current.gap, targets.gap, lerpFactor);
 
         // Handle lean dynamics for status animations
-        if (status === 'dropped') {
+        if (statusRef.current === 'dropped') {
           current.dropProgress += delta * 18;
           const totalDuration = Math.PI * 4;
           if (current.dropProgress < totalDuration) {
@@ -202,6 +209,14 @@ export default function Beyblade({ status }) {
         container.removeChild(renderer.domElement);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    statusRef.current = status;
+    const gray = status === 'disconnected';
+    coloredMaterials.current.forEach(({ material, baseColor }) => {
+      material.color.set(gray ? 0x808080 : baseColor);
+    });
   }, [status]);
 
   const handleSliderChange = (setter, value) => {
