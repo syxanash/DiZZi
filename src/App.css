@@ -194,7 +194,7 @@
   
   --level: 0;
 
-  transform: scaleY(calc(1 + var(--level) * 6));
+  transform: scaleY(calc(1 + var(--level) * 10));
   transition: transform 0.008s linear;
   filter: blur(4px) brightness(calc(1 + var(--level) * 0.7));
 }

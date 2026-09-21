@@ -121,13 +121,33 @@ export default function Beyblade({ status }) {
     const blade = createPart(groupTop, new THREE.CylinderGeometry(1.6, 1.8, 0.4, 8), 1.075, coloredMaterial(0xa7c7e7));
     addTopDisc(blade, 1.2, 0xc9764c);
 
-    // Flared piece: y = 0.7 so its top face (0.7 + 0.35/2 = 0.875) meets the blade's bottom face (1.075 - 0.4/2 = 0.875)
     createPart(groupTop, new THREE.CylinderGeometry(1.8, 1.6, 0.35, 8), 0.7, coloredMaterial(0x6f8faf));
 
-    // 2. Ratchet (Middle Group) - Base Y is 0.1
-    createPart(groupRatchet, new THREE.CylinderGeometry(1.4, 1.4, 0.45, 12), 0.1, coloredMaterial(0x8080ff));
+    // 2. Ratchet (Middle Group)
+    // Polygon path whose vertices match CylinderGeometry's radialSegments after rotateX(-PI/2)
+    function polyPath(radius, sides, path) {
+      for (let i = 0; i < sides; i++) {
+        const a = (i / sides) * Math.PI * 2;
+        const x = Math.sin(a) * radius;
+        const y = -Math.cos(a) * radius;
+        if (i === 0) path.moveTo(x, y);
+        else path.lineTo(x, y);
+      }
+      path.closePath();
+    }
 
-    // 3. Bit (Bottom Group) - Base Y starts at -0.325
+    const ratchetShape = new THREE.Shape();
+    polyPath(1.4, 15, ratchetShape);
+    const bitHole = new THREE.Path();
+    polyPath(0.5, 6, bitHole);
+    ratchetShape.holes.push(bitHole);
+
+    const ratchetGeo = new THREE.ExtrudeGeometry(ratchetShape, { depth: 0.35, bevelEnabled: false });
+    ratchetGeo.rotateX(-Math.PI / 2); // extrude axis z -> y
+    ratchetGeo.translate(0, -0.175, 0); // center vertically like CylinderGeometry
+    createPart(groupRatchet, ratchetGeo, 0.1, coloredMaterial(0x8080ff));
+
+    // 3. Bit (Bottom Group)
     createPart(groupBit, new THREE.CylinderGeometry(0.5, 0.5, 0.25, 16), -0.25, coloredMaterial(0x9fe2bf));
     createPart(groupBit, new THREE.CylinderGeometry(0.4, 0.32, 0.5, 16), -0.625, coloredMaterial(0x9fe2bf));
     createPart(groupBit, new THREE.CylinderGeometry(0.25, 0.01, 0.35, 16), -1.05, coloredMaterial(0x9fe2bf));
@@ -192,9 +212,10 @@ export default function Beyblade({ status }) {
       beyblade.rotation.x = current.tiltX;
       beyblade.rotation.y -= current.speed;
 
-      const FLUSH_OFFSET = 0.2;
-      groupRatchet.position.y = FLUSH_OFFSET - current.gap;
-      groupBit.position.y = FLUSH_OFFSET - current.gap * 2;
+      const RATCHET_OFFSET = 0.25;
+      const BIT_OFFSET = 0.3;
+      groupRatchet.position.y = RATCHET_OFFSET - current.gap;
+      groupBit.position.y = BIT_OFFSET - current.gap * 2;
 
       renderer.render(scene, camera);
     }
