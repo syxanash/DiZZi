@@ -1,7 +1,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
-// import { getTTS } from './tts.js';
+import { getTTS } from './tts.js';
 import { startBluetooth, bleEvents } from './scanner.js';
 
 const app = express();
@@ -13,17 +13,17 @@ app.get('/', (_req, res) => {
   res.json({ message: 'Express is ok' });
 });
 
-// app.post('/api/tts', async (req, res) => {
-//   const { text, voice = 'af_heart' } = req.body;
-//   if (!text) return res.status(400).json({ error: 'text is required' });
+app.post('/api/tts', async (req, res) => {
+  const { text, voice = 'af_heart' } = req.body;
+  if (!text) return res.status(400).json({ error: 'text is required' });
 
-//   const tts = await getTTS();
-//   const audio = await tts.generate(text, { voice });
-//   const buffer = Buffer.from(audio.toWav());
+  const tts = await getTTS();
+  const audio = await tts.generate(text, { voice });
+  const buffer = Buffer.from(audio.toWav());
 
-//   res.set('Content-Type', 'audio/wav');
-//   res.send(buffer);
-// });
+  res.set('Content-Type', 'audio/wav');
+  res.send(buffer);
+});
 
 const wss = new WebSocketServer({ server });
 
