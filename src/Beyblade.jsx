@@ -3,9 +3,9 @@ import * as THREE from 'three';
 import './Beyblade.css';
 
 const STATUS_TARGETS = {
-  idle: { speed: 0.03, camY: 0, camZ: 7, tiltX: 0.2, lean: 0, gap: 1.5 },
-  disconnected: { speed: 0, camY: 0, camZ: 7, tiltX: 0.2, lean: 0, gap: 1.5 },
-  attached: { speed: 0, camY: 0, camZ: 7, tiltX: 0.2, lean: 0, gap: 0 },
+  idle: { speed: 0.03, camY: 0.5, camZ: 7, tiltX: 0.2, lean: 0, gap: 1.5 },
+  disconnected: { speed: 0, camY: 0.5, camZ: 7, tiltX: 0.2, lean: 0, gap: 1.5 },
+  attached: { speed: 0, camY: 0.5, camZ: 7, tiltX: 0.2, lean: 0, gap: 0 },
   spin_fast: { speed: 0.3, camY: -2, camZ: 7, tiltX: 0.3, lean: 0.6, gap: 0 },
   spin_slow: { speed: 0.09, camY: 2, camZ: 7, tiltX: 0.2, lean: 0.4, gap: 0 },
   dropped: { speed: 0, camY: -6, camZ: 7, tiltX: 0.2, lean: 0, gap: 0 },
