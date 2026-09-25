@@ -39,11 +39,14 @@ export function battlepassDecoder(payload) {
   } else {
     // body decoder
     const bodyPages =
-      payload.filter((item) => item[0].toString(16).match(/b[0-7]/));
+      payload.filter((item) => item[0].toString(16).match(/^b[0-7]/));
+
+    if (bodyPages.length !== 8) {
+      throw Error("Pages incomplete!");
+    }
 
     const numEntries = bodyPages[6][ENTRIES_SUM_BYTEPOS];
 
-    console.log(bodyPages);
     const launches = [];
 
     let byteSum = 0;
@@ -56,12 +59,12 @@ export function battlepassDecoder(payload) {
           launches.push(currentLaunch);
         }
       }
-      
+
       byteSum += item.slice(1).reduce((partialSum, entry) => partialSum + entry, 0);
     });
 
     if ((byteSum % 256) !== bodyPages[7][CHECKSUM_BYTEPOS]) {
-      console.log('NOT OK!');
+      throw new Error("Checksum doesn't match!");
     };
 
     battlepass.status = "launched";
