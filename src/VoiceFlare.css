@@ -28,8 +28,8 @@
   top: 44%;
   height: 14%;
   background:
-    radial-gradient(60% 100% at 38% 50%, rgba(120, 200, 255, 0.95) 0%, rgba(120, 200, 255, 0) 70%),
-    radial-gradient(55% 100% at 62% 60%, rgba(255, 120, 40, 0.9) 0%, rgba(255, 120, 40, 0) 70%);
+    radial-gradient(60% 100% at 50% 30%, rgba(120, 200, 255, 0.95) 0%, rgba(120, 200, 255, 0) 70%),
+    radial-gradient(55% 100% at 50% 70%, rgba(255, 120, 40, 0.9) 0%, rgba(255, 120, 40, 0) 70%);
 
   --level: 0;
 

@@ -72,8 +72,10 @@ export function startBluetooth() {
 
               clearTimeout(flushTimer);
               flushTimer = setTimeout(() => {
-                const formattedDate = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
-                const payload = {[formattedDate]: dataStream };
+                // const formattedDate = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
+                // const payload = {[formattedDate]: dataStream };
+
+                const payload = dataStream;
 
                 dataStream = [];
 
