@@ -2,11 +2,13 @@ const COUNTER_BYTEPOS = 9;
 const PAGE_BYTEPOS = 0;
 const STATUS_BYTEPOS = 3;
 const HIGHSCORE_BYTEPOS = 8;
+const ENTRIES_SUM_BYTEPOS = 11;
+const CHECKSUM_BYTEPOS = 16;
 
 let globalCounter = undefined;
 
 export function battlepassDecoder(payload) {
-  // console.log(payload);
+  console.log(payload);
 
   const battlepass = {
     highScore: undefined,
@@ -36,36 +38,36 @@ export function battlepassDecoder(payload) {
     }
   } else {
     // body decoder
-    const filteredPages =
+    const bodyPages =
       payload.filter((item) => item[0].toString(16).match(/b[0-7]/));
 
-    const filteredPagesWithoutPage = filteredPages.map(item => item.slice(1));
+    const numEntries = bodyPages[6][ENTRIES_SUM_BYTEPOS];
 
-    const numEntries = filteredPagesWithoutPage[6][10];
-
-    // console.log(filteredPagesWithoutPage);
+    console.log(bodyPages);
     const launches = [];
 
-    filteredPagesWithoutPage.forEach((item) => {
-      for (let i = 1; i < item.length; i = i + 2) {
+    let byteSum = 0;
+
+    bodyPages.slice(0, 7).forEach((item) => {
+      for (let i = 2; i < item.length; i = i + 2) {
         const currentLaunch = parseInt(`${item[i].toString(16)}${item[i - 1].toString(16)}`, 16);
         // process.stdout.write(currentLaunch + " ");
         if (launches.length < numEntries) {
           launches.push(currentLaunch);
-        } else {
-          console.log('finished entries');
-          break;
         }
       }
-      // console.log('');
+      
+      byteSum += item.slice(1).reduce((partialSum, entry) => partialSum + entry, 0);
     });
 
-    console.log(filteredPagesWithoutPage);
+    if ((byteSum % 256) !== bodyPages[7][CHECKSUM_BYTEPOS]) {
+      console.log('NOT OK!');
+    };
 
     battlepass.status = "launched";
     battlepass.launchesValues = launches;
-    battlepass.highScore = parseInt(`${filteredPagesWithoutPage[6][HIGHSCORE_BYTEPOS - 1].toString(16)}${filteredPagesWithoutPage[6][HIGHSCORE_BYTEPOS - 2].toString(16)}`, 16);
-    battlepass.lifetimeCounter = parseInt(filteredPagesWithoutPage[6][8].toString(16), 16);
+    battlepass.highScore = parseInt(`${bodyPages[6][HIGHSCORE_BYTEPOS].toString(16)}${bodyPages[6][HIGHSCORE_BYTEPOS - 1].toString(16)}`, 16);
+    battlepass.lifetimeCounter = parseInt(bodyPages[6][COUNTER_BYTEPOS].toString(16), 16);
   }
 
   return battlepass;
