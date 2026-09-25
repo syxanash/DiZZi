@@ -8,27 +8,27 @@ function App() {
   const [beyStatus, setBeyStatus] = useState('idle');
 
   useEffect(() => {
-    // const t = setTimeout(() => {
-    //   setBeyStatus('attached');
-    // }, 1000);
+    const t = setTimeout(() => {
+      setBeyStatus('attached');
+    }, 1000);
 
-    // const t2 = setTimeout(() => {
-    //   setBeyStatus('spin_fast');
-    // }, 2000);
+    const t2 = setTimeout(() => {
+      setBeyStatus('spin_fast');
+    }, 2000);
 
     const t3 = setTimeout(() => {
       setBeyStatus('disconnected');
     }, 6000);
 
-    // const t4 = setTimeout(() => {
-    //   setBeyStatus('idle');
-    // }, 8000);
+    const t4 = setTimeout(() => {
+      setBeyStatus('idle');
+    }, 8000);
 
     return () => {
-      // clearTimeout(t);
-      // clearTimeout(t2);
+      clearTimeout(t);
+      clearTimeout(t2);
       clearTimeout(t3);
-      // clearTimeout(t4);
+      clearTimeout(t4);
     };
   }, []);
 

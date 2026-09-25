@@ -1,14 +1,14 @@
 const COUNTER_BYTEPOS = 9;
 const PAGE_BYTEPOS = 0;
 const STATUS_BYTEPOS = 3;
-const HIGHSCORE_BYTEPOS = 8;
+const HIGHSCORE_BYTEPOS = 7;
 const ENTRIES_SUM_BYTEPOS = 11;
 const CHECKSUM_BYTEPOS = 16;
 
 let globalCounter = undefined;
 
 export function battlepassDecoder(payload) {
-  console.log(payload);
+  // console.log(payload);
 
   const battlepass = {
     highScore: undefined,
@@ -21,9 +21,9 @@ export function battlepassDecoder(payload) {
   if (payload.length <= 1 && payload[0][PAGE_BYTEPOS].toString(16) === 'a0') {
     const header = payload[0];
     // single event happend (either dropped or attached bey)
-    const launchesCounter = header[COUNTER_BYTEPOS];
+    const launchesCounter = header.readUInt16LE(COUNTER_BYTEPOS);
     const status = header[STATUS_BYTEPOS].toString(16);
-    const highScore = parseInt(`0x${header[HIGHSCORE_BYTEPOS].toString(16)}${header[HIGHSCORE_BYTEPOS - 1].toString(16)}`, 16);
+    const highScore = header.readUInt16LE(HIGHSCORE_BYTEPOS);
 
     if (status === '4') {
       globalCounter = launchesCounter;
@@ -52,8 +52,8 @@ export function battlepassDecoder(payload) {
     let byteSum = 0;
 
     bodyPages.slice(0, 7).forEach((item) => {
-      for (let i = 2; i < item.length; i = i + 2) {
-        const currentLaunch = parseInt(`${item[i].toString(16)}${item[i - 1].toString(16)}`, 16);
+      for (let i = 1; i < item.length; i = i + 2) {
+        const currentLaunch = item.readUInt16LE(i);
         // process.stdout.write(currentLaunch + " ");
         if (launches.length < numEntries) {
           launches.push(currentLaunch);
@@ -69,17 +69,17 @@ export function battlepassDecoder(payload) {
 
     battlepass.status = "launched";
     battlepass.launchesValues = launches;
-    battlepass.highScore = parseInt(`${bodyPages[6][HIGHSCORE_BYTEPOS].toString(16)}${bodyPages[6][HIGHSCORE_BYTEPOS - 1].toString(16)}`, 16);
-    battlepass.lifetimeCounter = parseInt(bodyPages[6][COUNTER_BYTEPOS].toString(16), 16);
+    battlepass.highScore = bodyPages[6].readUInt16LE(HIGHSCORE_BYTEPOS);
+    battlepass.lifetimeCounter = bodyPages[6].readUInt16LE(COUNTER_BYTEPOS);
   }
 
   return battlepass;
 }
 
-// const initialPayload = [Buffer.from('a03a0004fe00006210110035b40451c4da', 'hex')];
-// const failedPayload = [Buffer.from('a03a0000f500006210110035b40451c4da', 'hex')];
-// console.log(battlepassDecoder(initialPayload));
-// console.log(battlepassDecoder(failedPayload));
+const initialPayload = [Buffer.from('a03a0004fe00006210110035b40451c4da', 'hex')];
+const failedPayload = [Buffer.from('a03a0000f500006210110035b40451c4da', 'hex')];
+console.log(battlepassDecoder(initialPayload));
+console.log(battlepassDecoder(failedPayload));
 
 const actualHeader = [Buffer.from('a03a0004ff00006210100035b40451c4da', 'hex')];
 const actualSequence =
