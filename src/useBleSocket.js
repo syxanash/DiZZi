@@ -2,9 +2,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 export function useBleSocket(url = 'ws://localhost:4567') {
-  const [status, setStatus] = useState('connecting');
+  const [wsStatus, setWSStatus] = useState('connecting');
   const [device, setDevice] = useState('unknown');
-  const [lastPacket, setLastPacket] = useState(null);
+  const [recording, setRecording] = useState(null);
   const wsRef = useRef(null);
 
   useEffect(() => {
@@ -14,9 +14,9 @@ export function useBleSocket(url = 'ws://localhost:4567') {
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
-      ws.onopen = () => setStatus('open');
+      ws.onopen = () => setWSStatus('open');
       ws.onclose = () => {
-        setStatus('closed');
+        setWSStatus('closed');
         setDevice('unknown');
         if (!closedByUs) setTimeout(connect, 1000);
       };
@@ -24,10 +24,10 @@ export function useBleSocket(url = 'ws://localhost:4567') {
 
       ws.onmessage = (e) => {
         const msg = JSON.parse(e.data);
-        if (msg.type === 'status') {
-          setDevice(msg.state);
-        } else if (msg.type === 'packet') {
-          setLastPacket(msg.payload);
+        if (msg.type === 'device') {
+          setDevice(msg.device);
+        } else if (msg.type === 'recording') {
+          setRecording(msg.recording);
         }
       };
     };
@@ -39,5 +39,5 @@ export function useBleSocket(url = 'ws://localhost:4567') {
     };
   }, [url]);
 
-  return { status, device, lastPacket };
+  return { wsStatus, device, recording };
 }

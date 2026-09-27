@@ -1,5 +1,6 @@
 import noble from '@abandonware/noble';
 import EventEmitter from 'events';
+import { battlepassDecoder } from './decoder.js';
 
 export const bleEvents = new EventEmitter();
 
@@ -12,9 +13,10 @@ export function startBluetooth() {
   let flushTimer = undefined;
 
   function processPayload(payload) {
-    console.log('===== PROCESSED PAYLOADS ======');
-    console.log(payload);
-    bleEvents.emit('packet', payload);
+    // console.log('===== PROCESSED PAYLOADS ======');
+    const battlePass = battlepassDecoder(payload);
+
+    bleEvents.emit('recording', battlePass);
   }
 
   noble.on('stateChange', state => {
@@ -37,11 +39,11 @@ export function startBluetooth() {
 
       console.log(`Connected to ${peripheralName}, GATT map below:`);
 
-      bleEvents.emit('status', 'connected');
+      bleEvents.emit('device', 'connected');
 
       peripheral.once('disconnect', () => {
         console.log(`Bluetooth ${peripheralName} disconnected...`);
-        bleEvents.emit('status', 'disconnected');
+        bleEvents.emit('device', 'disconnected');
 
         noble.startScanningAsync([], false);
       });
@@ -76,7 +78,6 @@ export function startBluetooth() {
                 // const payload = {[formattedDate]: dataStream };
 
                 const payload = dataStream;
-
                 dataStream = [];
 
                 processPayload(payload);

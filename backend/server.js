@@ -39,12 +39,12 @@ wss.on('connection', (socket) => {
   socket.on('close', () => console.log('client left, total: ', wss.clients.size));
 });
 
-bleEvents.on('packet', (payload) => {
-  broadcast({ type: 'packet', payload });
+bleEvents.on('device', (device) => {
+  broadcast({ type: 'device', device });
 });
 
-bleEvents.on('status', (state) => {
-  broadcast({ type: 'status', state });
+bleEvents.on('recording', (recoring) => {
+  broadcast({ type: 'recording', recoring });
 });
 
 const PORT = process.env.PORT || 4567;

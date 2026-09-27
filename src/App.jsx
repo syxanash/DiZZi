@@ -77,7 +77,7 @@ function App() {
           <div className="main-panel">
             <div className="layout-row">
               <div className="beyblade-side">
-                <Beyblade status={beyStatus} />
+                {/* <Beyblade status={beyStatus} /> */}
               </div>
               <div className="window-frame">
                 <div className="window-titlebar">
