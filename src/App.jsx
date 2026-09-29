@@ -19,22 +19,22 @@ function App() {
     }, 1000);
 
     const t2 = setTimeout(() => {
-      setBeyStatus('spin_fast');
+      setBeyStatus('spin_slow');
     }, 2000);
 
-    const t3 = setTimeout(() => {
-      setBeyStatus('disconnected');
-    }, 6000);
+    // const t3 = setTimeout(() => {
+    //   setBeyStatus('disconnected');
+    // }, 6000);
 
-    const t4 = setTimeout(() => {
-      setBeyStatus('idle');
-    }, 8000);
+    // const t4 = setTimeout(() => {
+    //   setBeyStatus('idle');
+    // }, 8000);
 
     return () => {
       clearTimeout(t);
       clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
+      // clearTimeout(t3);
+      // clearTimeout(t4);
     };
   }, []);
 
@@ -81,19 +81,10 @@ function App() {
           </div>
 
           <div className="main-panel">
-            <div className="window-frame">
-              <div className="window-titlebar">
-                <span>_</span>
-                <span>□</span>
-                <span>X</span>
-              </div>
-              <div className="window-body">
-                <div className="beyblade-side">
-                  <Beyblade status={beyStatus} />
-                </div>
-                { recording && <InfoPanel recording={recording} /> }
-              </div>
+            <div className="beyblade-side">
+              <Beyblade status={beyStatus} />
             </div>
+            <InfoPanel recording={recording} />
           </div>
         </div>
       </div>

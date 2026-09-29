@@ -3,12 +3,12 @@ import * as THREE from 'three';
 import './Beyblade.css';
 
 const STATUS_TARGETS = {
-  idle: { speed: 0.03, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 1.5 },
-  disconnected: { speed: 0, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 1.5 },
-  attached: { speed: 0, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 0 },
-  spin_fast: { speed: 0.3, camY: -2, camZ: 5.5, tiltX: 0.3, lean: 0.6, gap: 0 },
-  spin_slow: { speed: 0.09, camY: 2, camZ: 5.5, tiltX: 0.2, lean: 0.4, gap: 0 },
-  dropped: { speed: 0, camY: -6, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 0 },
+  idle: { speed: 0.03, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 1.5, lookY: -0.5 },
+  disconnected: { speed: 0, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 1.5, lookY: -0.5 },
+  attached: { speed: 0, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 0, lookY: 0.2 },
+  spin_fast: { speed: 0.3, camY: -2, camZ: 5.5, tiltX: 0.3, lean: 0.6, gap: 0, lookY: 0.0 },
+  spin_slow: { speed: 0.09, camY: 0.7, camZ: 5.5, tiltX: 0.2, lean: 0.4, gap: 0, lookY: 0.2 },
+  dropped: { speed: 0, camY: -6, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 0, lookY: -0.5 },
 };
 
 // Spacing multipliers applied to `gap`
@@ -23,6 +23,7 @@ export default function Beyblade({ status }) {
   const [tiltX, setTiltX] = useState(0.2);
   const [lean, setLean] = useState(0);
   const [gap, setGap] = useState(1.5);
+  const [lookY, setLookY] = useState(-0.5);
 
   const containerRef = useRef(null);
 
@@ -33,6 +34,7 @@ export default function Beyblade({ status }) {
     tiltX: 0.2,
     lean: 0,
     gap: 1.5,
+    lookY: -0.5,
     dropProgress: 0,
   });
 
@@ -49,15 +51,16 @@ export default function Beyblade({ status }) {
       setTiltX(target.tiltX);
       setLean(target.lean);
       setGap(target.gap);
+      setLookY(target.lookY);
       if (status === 'dropped') animValues.current.dropProgress = 0;
       isManualMode.current = false;
     }
   }, [status]);
 
-  const targetsRef = useRef({ speed, camY, camZ, tiltX, lean, gap });
+  const targetsRef = useRef({ speed, camY, camZ, tiltX, lean, gap, lookY });
   useEffect(() => {
-    targetsRef.current = { speed, camY, camZ, tiltX, lean, gap };
-  }, [speed, camY, camZ, tiltX, lean, gap]);
+    targetsRef.current = { speed, camY, camZ, tiltX, lean, gap, lookY };
+  }, [speed, camY, camZ, tiltX, lean, gap, lookY]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -187,6 +190,7 @@ export default function Beyblade({ status }) {
         current.camZ = THREE.MathUtils.lerp(current.camZ, targets.camZ, lerpFactor);
         current.tiltX = THREE.MathUtils.lerp(current.tiltX, targets.tiltX, lerpFactor);
         current.gap = THREE.MathUtils.lerp(current.gap, targets.gap, lerpFactor);
+        current.lookY = THREE.MathUtils.lerp(current.lookY, targets.lookY, lerpFactor);
 
         // Handle lean dynamics for status animations
         if (statusRef.current === 'dropped') {
@@ -206,7 +210,7 @@ export default function Beyblade({ status }) {
       // Apply animated parameters to Three.js scene
       camera.position.y = current.camY;
       camera.position.z = current.camZ;
-      camera.lookAt(0, -0.5, 0);
+      camera.lookAt(0, current.lookY, 0);
 
       const ratchetDrop = current.gap * RATCHET_GAP_SCALE;
       const bitDrop = ratchetDrop + current.gap * BIT_GAP_SCALE;
@@ -214,6 +218,9 @@ export default function Beyblade({ status }) {
       pivot.position.y = TIP_Y;
       beyblade.position.y = -TIP_Y;
 
+      // Shift the pivot opposite to the lean so the bey's middle stays centered
+      const CENTER_HEIGHT = 2; // distance from tip to bey's middle
+      pivot.position.x = Math.sin(current.lean) * CENTER_HEIGHT;
       pivot.rotation.z = current.lean;
       beyblade.rotation.x = current.tiltX;
       beyblade.rotation.y -= current.speed;
@@ -316,6 +323,17 @@ export default function Beyblade({ status }) {
           type="range"
           min="0"
           max="1.5"
+          step="0.1"
+        />
+      </div>
+      <div className="control-group">
+        <label>Aim (Look Y):</label>
+        <input
+          value={lookY}
+          onChange={(e) => handleSliderChange(setLookY, parseFloat(e.target.value))}
+          type="range"
+          min="-3"
+          max="3"
           step="0.1"
         />
       </div>

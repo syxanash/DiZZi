@@ -1,12 +1,33 @@
 .info-panel {
-  flex: 1 1 50%;
+  flex: 1 1 60%;
+  min-width: 0;
   display: flex;
-  color: var(--accent-yellow);
-  flex-direction: column;
-  justify-content: center;
-  /* vertical center */
-  align-items: center;
-  /* horizontal center */
-  text-align: center;
   padding: 24px;
+}
+
+.terminal {
+  flex: 1;
+  overflow-y: auto;
+  background: #000;
+  border-radius: 12px;
+  border: 2px solid #333;
+  box-shadow: inset 0 0 30px rgba(51, 255, 102, 0.12);
+  padding: 20px;
+  font-family: "VT323", "Share Tech Mono", ui-monospace, monospace;
+  font-size: clamp(16px, 1.8vw, 28px);
+  line-height: 1.3;
+  color: #33ff66;
+  text-shadow: 0 0 6px rgba(51, 255, 102, 0.6);
+}
+
+.terminal p {
+  margin: 0;
+}
+
+.terminal-cursor {
+  animation: terminal-blink 1s steps(1) infinite;
+}
+
+@keyframes terminal-blink {
+  50% { opacity: 0; }
 }
