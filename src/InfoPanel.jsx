@@ -1,17 +1,14 @@
-import { useBleSocket } from './useBleSocket';
-
 import './InfoPanel.css';
 
-export default function InfoPanel() {
-  const { wsStatus, device, recording } = useBleSocket();
+export default function InfoPanel({ recording }) {
+  const { launchesValues, highScore, lifetimeCounter } = recording;
 
   return (
     <div className="info-panel">
       <h2>DiZZi</h2>
-      <p>WS Server: {wsStatus}</p>
-      <p>Device: {device}</p>
-      <pre>{recording ? JSON.stringify(recording, null, 2) : 'no data yet'}</pre>
-      <p>Some text next to the beyblade.</p>
+      <p>Last score: {launchesValues[launchesValues.length - 1]}</p>
+      <p>Highest: {highScore}</p>
+      <p>Total: {lifetimeCounter}</p>
     </div>
   );
 }

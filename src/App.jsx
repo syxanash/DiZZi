@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import { useBleSocket } from './useBleSocket';
 import Beyblade from './Beyblade';
 import InfoPanel from './InfoPanel';
 import VoiceFlare from './VoiceFlare';
 
 function App() {
   const [beyStatus, setBeyStatus] = useState('idle');
+  const { wsStatus, device, recording } = useBleSocket();
+
+  console.log(wsStatus);
+  console.log(device);
+  console.log(recording);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -75,19 +81,17 @@ function App() {
           </div>
 
           <div className="main-panel">
-            <div className="layout-row">
-              <div className="beyblade-side">
-                {/* <Beyblade status={beyStatus} /> */}
+            <div className="window-frame">
+              <div className="window-titlebar">
+                <span>_</span>
+                <span>□</span>
+                <span>X</span>
               </div>
-              <div className="window-frame">
-                <div className="window-titlebar">
-                  <span>_</span>
-                  <span>□</span>
-                  <span>X</span>
+              <div className="window-body">
+                <div className="beyblade-side">
+                  <Beyblade status={beyStatus} />
                 </div>
-                <div className="window-body">
-                  <InfoPanel />
-                </div>
+                { recording && <InfoPanel recording={recording} /> }
               </div>
             </div>
           </div>

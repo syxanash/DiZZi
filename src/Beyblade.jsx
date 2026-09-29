@@ -3,13 +3,17 @@ import * as THREE from 'three';
 import './Beyblade.css';
 
 const STATUS_TARGETS = {
-  idle: { speed: 0.03, camY: 0.5, camZ: 7, tiltX: 0.2, lean: 0, gap: 1.5 },
-  disconnected: { speed: 0, camY: 0.5, camZ: 7, tiltX: 0.2, lean: 0, gap: 1.5 },
-  attached: { speed: 0, camY: 0.5, camZ: 7, tiltX: 0.2, lean: 0, gap: 0 },
-  spin_fast: { speed: 0.3, camY: -2, camZ: 7, tiltX: 0.3, lean: 0.6, gap: 0 },
-  spin_slow: { speed: 0.09, camY: 2, camZ: 7, tiltX: 0.2, lean: 0.4, gap: 0 },
-  dropped: { speed: 0, camY: -6, camZ: 7, tiltX: 0.2, lean: 0, gap: 0 },
+  idle: { speed: 0.03, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 1.5 },
+  disconnected: { speed: 0, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 1.5 },
+  attached: { speed: 0, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 0 },
+  spin_fast: { speed: 0.3, camY: -2, camZ: 5.5, tiltX: 0.3, lean: 0.6, gap: 0 },
+  spin_slow: { speed: 0.09, camY: 2, camZ: 5.5, tiltX: 0.2, lean: 0.4, gap: 0 },
+  dropped: { speed: 0, camY: -6, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 0 },
 };
+
+// Spacing multipliers applied to `gap`
+const RATCHET_GAP_SCALE = 0.67; // blade -> ratchet
+const BIT_GAP_SCALE = 1; // ratchet -> bit
 
 export default function Beyblade({ status }) {
 
@@ -25,7 +29,7 @@ export default function Beyblade({ status }) {
   const animValues = useRef({
     speed: 0.03,
     camY: 0,
-    camZ: 7,
+    camZ: 5.5,
     tiltX: 0.2,
     lean: 0,
     gap: 1.5,
@@ -204,7 +208,9 @@ export default function Beyblade({ status }) {
       camera.position.z = current.camZ;
       camera.lookAt(0, -0.5, 0);
 
-      const TIP_Y = -1.025 - current.gap * 2;
+      const ratchetDrop = current.gap * RATCHET_GAP_SCALE;
+      const bitDrop = ratchetDrop + current.gap * BIT_GAP_SCALE;
+      const TIP_Y = -1.025 - bitDrop;
       pivot.position.y = TIP_Y;
       beyblade.position.y = -TIP_Y;
 
@@ -214,8 +220,8 @@ export default function Beyblade({ status }) {
 
       const RATCHET_OFFSET = 0.25;
       const BIT_OFFSET = 0.3;
-      groupRatchet.position.y = RATCHET_OFFSET - current.gap;
-      groupBit.position.y = BIT_OFFSET - current.gap * 2;
+      groupRatchet.position.y = RATCHET_OFFSET - ratchetDrop;
+      groupBit.position.y = BIT_OFFSET - bitDrop;
 
       renderer.render(scene, camera);
     }
