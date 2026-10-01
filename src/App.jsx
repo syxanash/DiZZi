@@ -15,12 +15,12 @@ function App() {
 
   useEffect(() => {
     const t = setTimeout(() => {
-      setBeyStatus('attached');
+      setBeyStatus('disconnected');
     }, 1000);
 
-    const t2 = setTimeout(() => {
-      setBeyStatus('spin_slow');
-    }, 2000);
+    // const t2 = setTimeout(() => {
+    //   setBeyStatus('spin_slow');
+    // }, 2000);
 
     // const t3 = setTimeout(() => {
     //   setBeyStatus('disconnected');
@@ -32,7 +32,7 @@ function App() {
 
     return () => {
       clearTimeout(t);
-      clearTimeout(t2);
+      // clearTimeout(t2);
       // clearTimeout(t3);
       // clearTimeout(t4);
     };
