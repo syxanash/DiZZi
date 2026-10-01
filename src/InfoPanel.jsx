@@ -1,3 +1,4 @@
+import { memo, useEffect, useRef } from 'react';
 import './InfoPanel.css';
 
 const BLOCKS = '▁▂▃▄▅▆▇█';
@@ -35,6 +36,32 @@ function Sparkline({ values }) {
   );
 }
 
+const ScoreCounter = memo(function ScoreCounter({ value, duration = 800 }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = value;
+      return;
+    }
+    let frame;
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out: fast start, slows near the target
+      el.textContent = Math.round(value * eased);
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [value, duration]);
+
+  return (
+    <span ref={ref} className="rainbow" style={{ fontSize: 'clamp(48px, 12vw, 96px)' }}>0</span>
+  );
+});
+
 export default function InfoPanel({ recording }) {
   return (
     <div className="info-panel">
@@ -47,7 +74,10 @@ export default function InfoPanel({ recording }) {
             <p>&gt; Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
             <p>&gt; Last launch:</p>
             <div style={{ textAlign: 'center' }}>
-              <span className="rainbow" style={{ fontSize: 'clamp(48px, 12vw, 96px)' }}>{recording.launchesValues[recording.launchesValues.length - 1]}</span>
+              <ScoreCounter
+                key={recording.lifetimeCounter}
+                value={recording.launchesValues[recording.launchesValues.length - 1]}
+              />
             </div>
           </>
         ) : (
