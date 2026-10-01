@@ -30,6 +30,15 @@
   overflow: hidden;
 }
 
+.new-score {
+  animation: newScore 0.1s steps(1) infinite;
+}
+
+@keyframes newScore {
+  50%     { color: rgb(255, 238, 51); }
+  66%     { color: #f33; }
+}
+
 .rainbow {
   animation: rainbow 0.4s steps(1) infinite;
 }

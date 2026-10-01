@@ -2,7 +2,7 @@ import express from 'express';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { getTTS } from './tts.js';
-import { startBluetooth, emulateBluetooth, bleEvents } from './scanner.js';
+import { startBluetooth, bleEvents } from './scanner.js';
 
 const app = express();
 const server = createServer(app);
@@ -36,8 +36,6 @@ function broadcast(obj) {
 
 wss.on('connection', (socket) => {
   console.log('client connected total: ', wss.clients.size);
-  //remove this when done!
-  emulateBluetooth();
   socket.on('close', () => console.log('client left, total: ', wss.clients.size));
 });
 
@@ -53,5 +51,5 @@ const PORT = process.env.PORT || 4567;
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
-  // startBluetooth();
+  startBluetooth();
 });

@@ -8,11 +8,8 @@ import VoiceFlare from './VoiceFlare';
 function App() {
   const [beyStatus, setBeyStatus] = useState('idle');
   const { wsStatus, device, recording } = useBleSocket();
-
   console.log(wsStatus);
   console.log(device);
-  console.log(recording);
-
   useEffect(() => {
     const t = setTimeout(() => {
       setBeyStatus('disconnected');

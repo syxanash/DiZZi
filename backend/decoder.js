@@ -18,23 +18,27 @@ export function battlepassDecoder(payload) {
   };
 
   // header decoder
-  if (payload.length <= 1 && payload[0][PAGE_BYTEPOS].toString(16) === 'a0') {
-    const header = payload[0];
-    // single event happend (either dropped or attached bey)
-    const launchesCounter = header.readUInt16LE(COUNTER_BYTEPOS);
-    const status = header[LAUNCHERMODE_BYTEPOS].toString(16);
-    const highScore = header.readUInt16LE(HIGHSCORE_BYTEPOS);
+  const isHeaderOnly = payload.every((page) => page[PAGE_BYTEPOS] === 0xa0);
 
-    if (status === '4') {
-      globalCounter = launchesCounter;
+  if (isHeaderOnly) {
+    // one or more events (dropped or attached bey), e.g. attach + drop arriving
+    // in the same flush window: decode in order so the last event wins
+    for (const header of payload) {
+      const launchesCounter = header.readUInt16LE(COUNTER_BYTEPOS);
+      const status = header[LAUNCHERMODE_BYTEPOS].toString(16);
+      const highScore = header.readUInt16LE(HIGHSCORE_BYTEPOS);
 
-      battlepass.status = "attached";
-      battlepass.lifetimeCounter = launchesCounter;
-      battlepass.highScore = highScore;
-    } else if (status === '0' && launchesCounter <= globalCounter) {
-      battlepass.status = "dropped";
-      battlepass.lifetimeCounter = launchesCounter;
-      battlepass.highScore = highScore;
+      if (status === '4') {
+        globalCounter = launchesCounter;
+
+        battlepass.status = "attached";
+        battlepass.lifetimeCounter = launchesCounter;
+        battlepass.highScore = highScore;
+      } else if (status === '0' && launchesCounter <= globalCounter) {
+        battlepass.status = "dropped";
+        battlepass.lifetimeCounter = launchesCounter;
+        battlepass.highScore = highScore;
+      }
     }
   } else {
     // body decoder

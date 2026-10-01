@@ -8,25 +8,18 @@ const peripheralName = 'BEYBLADE_TOOL01';
 const subChar = '55c4f002f8eb11ecb9390242ac120002';
 // const writeChar = '55c4f001f8eb11ecb9390242ac120002';
 
-export function emulateBluetooth() {
-  bleEvents.emit('device', 'connected');
-
-  const testString = {"highScore":5415,"launchesValues":[3142,3398,1955,3483,3801,2972,4060,2748,1940,2100,4194,2155,2874,2332,3473,2710,2784,3168,5415,2701],"lifetimeCounter":20,"status":"launched"};
-
-  setTimeout(() => {
-    bleEvents.emit('recording', testString);
-  }, 2000);
-}
-
 export function startBluetooth() {
   let dataStream = [];
   let flushTimer = undefined;
 
   function processPayload(payload) {
-    // console.log('===== PROCESSED PAYLOADS ======');
-    const battlePass = battlepassDecoder(payload);
-
-    bleEvents.emit('recording', battlePass);
+    try {
+      const battlePass = battlepassDecoder(payload);
+      bleEvents.emit('recording', battlePass);
+    } catch (err) {
+      console.error('Decode failed:', err.message);
+      console.error(payload.map((p) => p.toString('hex')));
+    }
   }
 
   noble.on('stateChange', state => {

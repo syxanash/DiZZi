@@ -17,8 +17,8 @@ function bucket(values, maxCols) {
 
 function levelColor(level) {
   if (level <= 2) return '#f33';
-  if (level <= 5) return 'rgb(255, 160, 51)';
-  if (level <= 7) return 'rgb(255, 231, 51)';
+  if (level <= 3) return 'rgb(255, 160, 51)';
+  if (level <= 6) return 'rgb(255, 231, 51)';
   return 'rgb(51, 255, 75)';
 }
 
@@ -62,27 +62,41 @@ const ScoreCounter = memo(function ScoreCounter({ value, duration = 800 }) {
   );
 });
 
+function renderTerminalText(recording) {
+  if (recording.status === 'launched') {
+    return <>
+      <p>&gt; Trend:</p>
+      {recording.launchesValues.length > 0 && <Sparkline values={recording.launchesValues} />}
+      <p>&gt; Total: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span></p>
+      <p>&gt; Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
+      <p>&gt; Last launch:</p>
+      <div style={{ textAlign: 'center' }}>
+        <ScoreCounter
+          key={recording.lifetimeCounter}
+          value={recording.launchesValues[recording.launchesValues.length - 1]}
+        />
+      </div>
+    </>;
+  } else if (recording.status === 'attached') {
+    return <>
+      <p><span style={{ color: 'rgb(51, 255, 75)' }}>&gt; LET IT RIP!!!</span></p>
+    </>;
+  } else if (recording.status === 'dropped') {
+    return <>
+      <p><span style={{ color: 'rgb(51, 255, 75)' }}>&gt; DID YOU DROP YOUR BEYBLADE? :(</span></p>
+    </>;
+  }
+}
+
 export default function InfoPanel({ recording }) {
   return (
     <div className="info-panel">
       <div className="terminal">
-        {recording ? (
-          <>
-            <p>&gt; Trend:</p>
-            {recording.launchesValues.length > 0 && <Sparkline values={recording.launchesValues} />}
-            <p>&gt; Total: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span></p>
-            <p>&gt; Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
-            <p>&gt; Last launch:</p>
-            <div style={{ textAlign: 'center' }}>
-              <ScoreCounter
-                key={recording.lifetimeCounter}
-                value={recording.launchesValues[recording.launchesValues.length - 1]}
-              />
-            </div>
-          </>
-        ) : (
-          <p>&gt; Waiting for data...</p>
-        )}<span className="terminal-cursor">▒</span>
+        {recording
+          ? renderTerminalText(recording)
+          : (
+            <p>&gt; Waiting for data...</p>
+          )}<span className="terminal-cursor">▒</span>
       </div>
     </div>
   );
