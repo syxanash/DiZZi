@@ -5,13 +5,44 @@
   padding: 24px;
 }
 
+.terminal-window {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 2px solid #333;
+  overflow: hidden;
+}
+
+.terminal-titlebar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 4px 6px;
+  background: #3a3a3a;
+  border-bottom: 1px solid #222;
+}
+
+.terminal-btn {
+  width: 18px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  font: 12px/1 ui-monospace, monospace;
+  color: #ccc;
+  background: #555;
+  border: 1px solid #222;
+  border-radius: 3px;
+  user-select: none;
+}
+
 .terminal {
   position: relative;
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   background: #000;
-  border-radius: 12px;
-  border: 2px solid #333;
   box-shadow: inset 0 0 30px rgba(51, 255, 102, 0.12);
   padding: 20px;
   font-family: "VT323", "Share Tech Mono", ui-monospace, monospace;
@@ -36,7 +67,7 @@
 }
 
 .score-counter {
-  font-size: clamp(60px, 12vw, 120px);
+  font-size: clamp(80px, 12vw, 130px);
 }
 
 @keyframes newScore {

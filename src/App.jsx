@@ -7,18 +7,28 @@ import InfoPanel from './InfoPanel';
 import VoiceFlare from './VoiceFlare';
 
 const IDLE_AFTER_MS = {
-  dropped: 5000,
-  launched: 10000,
+  dropped: 10000,
+  launched: 15000,
 };
 
 function getBeyStatus(recording, wsStatus, device, isExpired) {
-  if (wsStatus !== 'open' || device !== 'connected' ) return 'disconnected';
+  if (wsStatus !== 'open' || device !== 'connected') return 'disconnected';
   if (!recording || recording.status === 'reset' || isExpired) return 'idle';
   if (recording.status === 'launched') {
     return recording.launchesValues.at(-1) < 5000 ? 'spin_slow' : 'spin_fast';
   }
   return recording.status;
 }
+
+const toggleFullSceen = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+};
 
 function App() {
   // the recording whose animation already timed out back to idle
@@ -71,7 +81,7 @@ function App() {
 
           {/* title */}
           <div className="title-plate">
-            <div className="title-pill">
+            <div className="title-pill" onClick={toggleFullSceen}>
               <span className="title-text">DiZZi<span className="dot">.</span><span className="ver">02</span></span>
             </div>
           </div>

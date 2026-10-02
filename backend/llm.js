@@ -2,7 +2,7 @@ import ollama from 'ollama';
 
 const MODEL = 'gemma3:1b';
 
-const SYSTEM_PROMPT = `You are an sassy and sarcastic Beyblade battle commentator.
+const SYSTEM_PROMPT = `You are a sarcastic Beyblade battle commentator.
 A Beyblade is a spinning top launched with a ripcord. Launch power is measured in RPM (rotations per minute).
 Higher RPM is better: under 3000 is weak, 3000-7000 is good, over 7000 is excellent.
 Reply with ONE short sentence (max 15 words) about how the player's launches are going.
@@ -28,7 +28,15 @@ Last launch: ${lastItem} RPM. Trend: ${trend}.`;
 
 // loads the model into memory so the first real launch doesn't wait for it
 export async function warmUpBrain() {
-  await ollama.generate({ model: MODEL, prompt: 'hi', keep_alive: -1, options: { num_predict: 1 } });
+  await ollama.chat({
+    model: MODEL,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: describeLaunches([5000]) },
+    ],
+    keep_alive: -1,
+    options: { num_predict: 1 },
+  });
 }
 
 function toSpeakableText(text) {

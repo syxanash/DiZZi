@@ -23,6 +23,7 @@ export function useBleSocket({ url = 'ws://localhost:4567', onRecording, onComme
       ws.onclose = () => {
         setWSStatus('closed');
         setDevice('unknown');
+        setRecording(null);
         if (!closedByUs) setTimeout(connect, 1000);
       };
       ws.onerror = () => ws.close();

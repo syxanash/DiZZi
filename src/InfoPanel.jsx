@@ -126,15 +126,15 @@ function renderTerminalText(recording) {
     </>;
   } else if (recording.status === 'attached') {
     return <>
-      <p><span style={{ color: 'rgb(51, 255, 75)' }}>&gt; LET IT RIP!!!</span></p>
+      <p><span style={{ color: 'rgb(51, 255, 75)' }}>&gt; LET IT RIP!!! <span className="terminal-cursor">▒</span></span></p>
     </>;
   } else if (recording.status === 'dropped') {
     return <>
-      <p><span style={{ color: 'rgb(51, 255, 75)' }}>&gt; DID YOU DROP YOUR BEYBLADE? :(</span></p>
+      <p><span style={{ color: '#f33' }}>&gt; DID YOU DROP YOUR BEYBLADE? :( <span className="terminal-cursor">▒</span></span></p>
     </>;
   } else if (recording.status === 'reset') {
     return <>
-      <p>&gt; The Beybattle was reset!</p>
+      <p>&gt; The Beybattle Pass was successfully RESET! <span className="terminal-cursor">▒</span></p>
     </>;
   }
 }
@@ -143,12 +143,19 @@ export default function InfoPanel({ recording }) {
   console.log(recording);
   return (
     <div className="info-panel">
-      <div className="terminal">
-        {recording
-          ? renderTerminalText(recording)
-          : (
-            <p>&gt; Waiting for data...</p>
-          )}<span className="terminal-cursor">▒</span>
+      <div className="terminal-window">
+        <div className="terminal-titlebar" aria-hidden="true">
+          <span className="terminal-btn">_</span>
+          <span className="terminal-btn">□</span>
+          <span className="terminal-btn">✕</span>
+        </div>
+        <div className="terminal">
+          {recording
+            ? renderTerminalText(recording)
+            : (
+              <p>&gt; Waiting for data... <span className="terminal-cursor">▒</span></p>
+            )}
+        </div>
       </div>
     </div>
   );
