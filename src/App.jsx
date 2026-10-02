@@ -7,7 +7,7 @@ import VoiceFlare from './VoiceFlare';
 
 function App() {
   const [beyStatus, setBeyStatus] = useState('idle');
-  const { wsStatus, device, recording } = useBleSocket();
+  const { wsStatus, device, recording, clearRecording } = useBleSocket();
   console.log(wsStatus);
   console.log(device);
   useEffect(() => {
@@ -35,6 +35,17 @@ function App() {
     };
   }, []);
 
+  async function sendResetRequest() {
+    const res = await fetch('/api/reset', { method: 'POST' });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error);
+    
+    if (data.message === 'RESET OK!') {
+      clearRecording();
+    }
+  }
+
   return (
     <>
       <div className="stage">
@@ -54,7 +65,7 @@ function App() {
           </div>
 
           {/* little crosshair glyph */}
-          <div className="crosshair" aria-hidden="true">
+          <div className="crosshair" aria-hidden="true" onClick={sendResetRequest}>
             <span></span><span></span>
           </div>
 

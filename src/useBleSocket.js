@@ -7,6 +7,8 @@ export function useBleSocket(url = 'ws://localhost:4567') {
   const [recording, setRecording] = useState(null);
   const wsRef = useRef(null);
 
+  const clearRecording = () => setRecording(null);
+
   useEffect(() => {
     let closedByUs = false;
 
@@ -39,5 +41,5 @@ export function useBleSocket(url = 'ws://localhost:4567') {
     };
   }, [url]);
 
-  return { wsStatus, device, recording };
+  return { wsStatus, device, recording, clearRecording };
 }

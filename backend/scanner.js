@@ -6,7 +6,14 @@ export const bleEvents = new EventEmitter();
 
 const peripheralName = 'BEYBLADE_TOOL01';
 const subChar = '55c4f002f8eb11ecb9390242ac120002';
-// const writeChar = '55c4f001f8eb11ecb9390242ac120002';
+const writeChar = '55c4f001f8eb11ecb9390242ac120002';
+
+let writeCharacteristic = null;
+
+export async function sendReset() {
+  if (!writeCharacteristic) throw new Error('Beyblade tool not connected');
+  await writeCharacteristic.writeAsync(Buffer.from([0x75]), true);
+}
 
 export function startBluetooth() {
   let dataStream = [];
@@ -47,7 +54,7 @@ export function startBluetooth() {
       peripheral.once('disconnect', () => {
         console.log(`Bluetooth ${peripheralName} disconnected...`);
         bleEvents.emit('device', 'disconnected');
-
+        writeCharacteristic = null;
         noble.startScanningAsync([], false);
       });
 
@@ -91,14 +98,9 @@ export function startBluetooth() {
             console.log(`Subscribed to: ${subChar}`);
           }
 
-          // if (char.uuid == writeChar) {
-          //   console.log('found the write charact...');
-
-          //   setTimeout(() => {
-          //     console.log('asking for data...');
-          //     char.write(Buffer.from([0x75]), true);
-          //   }, 3000);
-          // }
+          if (char.uuid == writeChar) {
+            writeCharacteristic = char;
+          }
         }
       }
     }

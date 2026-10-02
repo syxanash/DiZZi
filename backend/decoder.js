@@ -6,6 +6,7 @@ const ENTRIES_SUM_BYTEPOS = 11;
 const CHECKSUM_BYTEPOS = 16;
 
 let globalCounter = undefined;
+const RESET_ACK_PAGE = 0xa1;
 
 export function battlepassDecoder(payload) {
   // console.log(payload);
@@ -16,6 +17,15 @@ export function battlepassDecoder(payload) {
     lifetimeCounter: undefined,
     status: "unknown",
   };
+
+  const isReset = payload.some((page) => page[PAGE_BYTEPOS] === RESET_ACK_PAGE);
+
+  if (isReset) {
+    globalCounter = undefined;
+    battlepass.status = "reset";
+    battlepass.lifetimeCounter = 0;
+    return battlepass;
+  }
 
   // header decoder
   const isHeaderOnly = payload.every((page) => page[PAGE_BYTEPOS] === 0xa0);
@@ -71,7 +81,7 @@ export function battlepassDecoder(payload) {
       throw new Error("Checksum doesn't match!");
     };
 
-    battlepass.status = "launched";
+    battlepass.status = numEntries > 0 ? "launched" : "reset";
     battlepass.launchesValues = launches;
     battlepass.highScore = bodyPages[6].readUInt16LE(HIGHSCORE_BYTEPOS);
     battlepass.lifetimeCounter = bodyPages[6].readUInt16LE(COUNTER_BYTEPOS);

@@ -36,7 +36,7 @@ function Sparkline({ values }) {
   );
 }
 
-const ScoreCounter = memo(function ScoreCounter({ value, duration = 800 }) {
+const ScoreCounter = memo(function ScoreCounter({ value, duration = 800, newScore }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -58,12 +58,20 @@ const ScoreCounter = memo(function ScoreCounter({ value, duration = 800 }) {
   }, [value, duration]);
 
   return (
-    <span ref={ref} className="rainbow" style={{ fontSize: 'clamp(48px, 12vw, 96px)' }}>0</span>
+    <span ref={ref} className={`${newScore ? 'new-score' : 'rainbow'} score-counter`}>0</span>
   );
 });
 
 function renderTerminalText(recording) {
+  function isNewHighScore({ launchesValues, highScore }) {
+    const last = launchesValues.at(-1);
+    const previousBest = Math.max(0, ...launchesValues.slice(0, -1));
+
+    return last === highScore && last > previousBest;
+  }
+
   if (recording.status === 'launched') {
+    const newHighScore = isNewHighScore(recording);
     return <>
       <p>&gt; Trend:</p>
       {recording.launchesValues.length > 0 && <Sparkline values={recording.launchesValues} />}
@@ -73,9 +81,11 @@ function renderTerminalText(recording) {
       <div style={{ textAlign: 'center' }}>
         <ScoreCounter
           key={recording.lifetimeCounter}
-          value={recording.launchesValues[recording.launchesValues.length - 1]}
+          value={recording.launchesValues.at(-1)}
+          newScore={newHighScore}
         />
       </div>
+      {newHighScore ? <div style={{ textAlign: 'center' }}><p>WOW NEW SCORE!</p></div> : null}
     </>;
   } else if (recording.status === 'attached') {
     return <>
@@ -85,10 +95,15 @@ function renderTerminalText(recording) {
     return <>
       <p><span style={{ color: 'rgb(51, 255, 75)' }}>&gt; DID YOU DROP YOUR BEYBLADE? :(</span></p>
     </>;
+  } else if (recording.status === 'reset') {
+    return <>
+      <p>&gt; The Beybattle was reset!</p>
+    </>;
   }
 }
 
 export default function InfoPanel({ recording }) {
+  console.log(recording);
   return (
     <div className="info-panel">
       <div className="terminal">

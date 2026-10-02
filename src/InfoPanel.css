@@ -31,12 +31,17 @@
 }
 
 .new-score {
-  animation: newScore 0.1s steps(1) infinite;
+  animation: newScore 0.5s steps(1) infinite;
+}
+
+.score-counter {
+  font-size: clamp(60px, 12vw, 120px);
 }
 
 @keyframes newScore {
-  50%     { color: rgb(255, 238, 51); }
-  66%     { color: #f33; }
+  0%     { color: rgb(255, 160, 51); }
+  33%    { color: #f33; }
+  66%    { color: rgb(51, 255, 75); }
 }
 
 .rainbow {
@@ -44,12 +49,12 @@
 }
 
 @keyframes rainbow {
-  0%      { color: #f33; }
-  16.667% { color: rgb(255, 160, 51); }
-  33.333% { color: rgb(255, 238, 51); }
+  0%      { color: rgb(129, 127, 127); }
+  /* 16.667% { color: rgb(255, 160, 51); }
+  33.333% { color: rgb(255, 238, 51); } */
   50%     { color: rgb(51, 255, 75); }
-  66.667% { color: rgb(51, 170, 255); }
-  83.333% { color: rgb(255, 51, 228); }
+  /* 66.667% { color: rgb(51, 170, 255); }
+  83.333% { color: rgb(255, 51, 228); } */
 }
 
 .terminal-cursor {

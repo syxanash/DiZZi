@@ -2,7 +2,7 @@ import express from 'express';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { getTTS } from './tts.js';
-import { startBluetooth, bleEvents } from './scanner.js';
+import { startBluetooth, bleEvents, sendReset } from './scanner.js';
 
 const app = express();
 const server = createServer(app);
@@ -23,6 +23,15 @@ app.post('/api/tts', async (req, res) => {
 
   res.set('Content-Type', 'audio/wav');
   res.send(buffer);
+});
+
+app.post('/api/reset', async (req, res) => {
+  try {
+    await sendReset();
+    res.json({ message: 'RESET OK!' });
+  } catch (error) {
+    res.status(503).json({ error: error.message });
+  }
 });
 
 const wss = new WebSocketServer({ server });
