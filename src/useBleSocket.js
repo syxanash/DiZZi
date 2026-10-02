@@ -1,8 +1,9 @@
 
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
-export function useBleSocket({ url = 'ws://localhost:4567', onRecording } = {}) {
+export function useBleSocket({ url = 'ws://localhost:4567', onRecording, onComment } = {}) {
   const notifyRecording = useEffectEvent((rec) => onRecording?.(rec));
+  const notifyComment = useEffectEvent((comment) => onComment?.(comment));
 
   const [wsStatus, setWSStatus] = useState('connecting');
   const [device, setDevice] = useState('unknown');
@@ -33,6 +34,8 @@ export function useBleSocket({ url = 'ws://localhost:4567', onRecording } = {}) 
         } else if (msg.type === 'recording') {
           setRecording(msg.recording);
           notifyRecording(msg.recording);
+        } else if (msg.type === 'comment') {
+          notifyComment(msg.comment);
         }
       };
     };

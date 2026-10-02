@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { sample } from 'lodash';
 import './App.css';
 import { useBleSocket } from './useBleSocket';
 import Beyblade from './Beyblade';
@@ -26,16 +27,13 @@ function App() {
   const { wsStatus, device, recording, clearRecording } = useBleSocket({
     onRecording: (rec) => {
       if (rec.status === 'attached') {
-        voiceRef.current?.playTTS('3, 2, 1, go shoot!!!');
+        voiceRef.current?.playTTS(sample(['3, 2, 1, go shoot!!!', 'Let it rip!!!']));
       } else if (rec.status === 'dropped') {
         voiceRef.current?.playTTS('Did you just drop your beyblade?');
-      } else if (rec.status === 'launched') {
-        const lastLaunch = rec.launchesValues.at(-1);
-
-        voiceRef.current?.playTTS(lastLaunch < 5000
-          ? 'that was a very sloppy launch!'
-          : 'wow fast launch right there!');
       }
+    },
+    onComment: (comment) => {
+      voiceRef.current?.playTTS(comment);
     },
   });
 

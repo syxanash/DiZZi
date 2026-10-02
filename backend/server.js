@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { getTTS } from './tts.js';
 import { startBluetooth, bleEvents, sendReset } from './scanner.js';
+import { askBrain, warmUpBrain } from './llm.js';
 
 let deviceStatus = 'disconnected';
 
@@ -56,8 +57,18 @@ bleEvents.on('device', (device) => {
   broadcast({ type: 'device', device });
 });
 
-bleEvents.on('recording', (recording) => {
+bleEvents.on('recording', async (recording) => {
   broadcast({ type: 'recording', recording });
+
+  if (recording.status === 'launched') {
+    try {
+      const comment = await askBrain(recording);
+
+      broadcast({ type: 'comment', comment });
+    } catch (err) {
+      console.error('LLM comment failed:', err.message);
+    }
+  }
 });
 
 const PORT = process.env.PORT || 4567;
@@ -65,4 +76,10 @@ const PORT = process.env.PORT || 4567;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
   startBluetooth();
+
+  // load both models in the background so the first launch isn't slow
+  getTTS().then(() => console.log('TTS model ready'));
+  warmUpBrain()
+    .then(() => console.log('LLM model ready'))
+    .catch((err) => console.error('LLM warm-up failed:', err.message));
 });
