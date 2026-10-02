@@ -6,6 +6,7 @@
 }
 
 .terminal {
+  position: relative;
   flex: 1;
   overflow-y: auto;
   background: #000;
@@ -63,4 +64,29 @@
 
 @keyframes terminal-blink {
   50% { opacity: 0; }
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti span {
+  position: absolute;
+  top: -1em;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: 3;
+  animation-fill-mode: both;
+}
+
+@keyframes confetti-fall {
+  0%   { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(110vh); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti { display: none; }
 }

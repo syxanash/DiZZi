@@ -14,9 +14,9 @@ function getBeyStatus(recording, wsStatus, device, isExpired) {
   if (wsStatus !== 'open' || device !== 'connected' ) return 'disconnected';
   if (!recording || recording.status === 'reset' || isExpired) return 'idle';
   if (recording.status === 'launched') {
-    return recording.launchesValues.at(-1) < 3000 ? 'spin_slow' : 'spin_fast';
+    return recording.launchesValues.at(-1) < 5000 ? 'spin_slow' : 'spin_fast';
   }
-  return recording.status; // 'attached' | 'dropped'
+  return recording.status;
 }
 
 function App() {
@@ -32,15 +32,12 @@ function App() {
       } else if (rec.status === 'launched') {
         const lastLaunch = rec.launchesValues.at(-1);
 
-        voiceRef.current?.playTTS(lastLaunch < 3000
+        voiceRef.current?.playTTS(lastLaunch < 5000
           ? 'that was a very sloppy launch!'
           : 'wow fast launch right there!');
       }
     },
   });
-
-  console.log(wsStatus);
-  console.log(device);
 
   useEffect(() => {
     const delay = IDLE_AFTER_MS[recording?.status];

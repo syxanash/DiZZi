@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import './InfoPanel.css';
 
 const BLOCKS = '▁▂▃▄▅▆▇█';
@@ -33,6 +33,42 @@ function Sparkline({ values }) {
         return <span key={i} style={{ color: levelColor(level) }}>{BLOCKS[level]}</span>;
       })}
     </p>
+  );
+}
+
+const CONFETTI_CHARS = ['*', '+', 'o', '.', '~', '#', '%', '@'];
+const CONFETTI_COLORS = ['#f33', 'rgb(255, 160, 51)', 'rgb(255, 231, 51)', 'rgb(51, 255, 75)', 'rgb(51, 221, 255)'];
+
+function makeConfetti(count = 40) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    char: CONFETTI_CHARS[Math.floor(Math.random() * CONFETTI_CHARS.length)],
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    left: Math.random() * 100,
+    delay: Math.random() * 1.5,
+    duration: 1.5 + Math.random() * 1.5,
+  }));
+}
+
+function AsciiConfetti() {
+  const [pieces] = useState(() => makeConfetti());
+
+  return (
+    <div className="confetti" aria-hidden="true">
+      {pieces.map((p) => (
+        <span
+          key={p.id}
+          style={{
+            left: `${p.left}%`,
+            color: p.color,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+          }}
+        >
+          {p.char}
+        </span>
+      ))}
+    </div>
   );
 }
 
@@ -75,9 +111,9 @@ function renderTerminalText(recording) {
     return <>
       <p>&gt; Trend:</p>
       {recording.launchesValues.length > 0 && <Sparkline values={recording.launchesValues} />}
-      <p>&gt; Total: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span></p>
+      <p>&gt; Launches: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span></p>
       <p>&gt; Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
-      <p>&gt; Last launch:</p>
+      <p>&gt; Last score:</p>
       <div style={{ textAlign: 'center' }}>
         <ScoreCounter
           key={recording.lifetimeCounter}
@@ -86,6 +122,7 @@ function renderTerminalText(recording) {
         />
       </div>
       {newHighScore ? <div style={{ textAlign: 'center' }}><p>WOW NEW SCORE!</p></div> : null}
+      {newHighScore && <AsciiConfetti key={recording.lifetimeCounter} />}
     </>;
   } else if (recording.status === 'attached') {
     return <>
