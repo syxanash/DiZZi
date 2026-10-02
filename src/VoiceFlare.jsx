@@ -1,8 +1,8 @@
-import { useRef } from 'react';
+import { useRef, useImperativeHandle } from 'react';
 
 import './VoiceFlare.css';
 
-function VoiceFlare() {
+function VoiceFlare({ ref }) {
   const flareRef = useRef(null);
   const innerFlareRef = useRef(null);
   async function playTTS(text) {
@@ -45,11 +45,13 @@ function VoiceFlare() {
       URL.revokeObjectURL(url);
       flareRef.current.style.setProperty('--level', 0);
       innerFlareRef.current.style.setProperty('--level', 0);
+      audioCtx.close();
     };
   }
 
-  return <div
-    onClick={() => playTTS('This launch was not that great, try harder!')}>
+  useImperativeHandle(ref, () => ({ playTTS }));
+
+  return <div>
     <div className="flare" ref={flareRef} />
     <div className="inner-flare" ref={innerFlareRef} />
   </div>;

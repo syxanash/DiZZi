@@ -4,6 +4,8 @@ import { WebSocketServer } from 'ws';
 import { getTTS } from './tts.js';
 import { startBluetooth, bleEvents, sendReset } from './scanner.js';
 
+let deviceStatus = 'disconnected';
+
 const app = express();
 const server = createServer(app);
 
@@ -45,10 +47,12 @@ function broadcast(obj) {
 
 wss.on('connection', (socket) => {
   console.log('client connected total: ', wss.clients.size);
+  socket.send(JSON.stringify({ type: 'device', device: deviceStatus }));
   socket.on('close', () => console.log('client left, total: ', wss.clients.size));
 });
 
 bleEvents.on('device', (device) => {
+  deviceStatus = device;
   broadcast({ type: 'device', device });
 });
 

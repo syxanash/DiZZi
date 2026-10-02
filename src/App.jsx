@@ -1,46 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { useBleSocket } from './useBleSocket';
 import Beyblade from './Beyblade';
 import InfoPanel from './InfoPanel';
 import VoiceFlare from './VoiceFlare';
 
+const IDLE_AFTER_MS = {
+  dropped: 5000,
+  launched: 10000,
+};
+
+function getBeyStatus(recording, wsStatus, device, isExpired) {
+  if (wsStatus !== 'open' || device !== 'connected' ) return 'disconnected';
+  if (!recording || recording.status === 'reset' || isExpired) return 'idle';
+  if (recording.status === 'launched') {
+    return recording.launchesValues.at(-1) < 3000 ? 'spin_slow' : 'spin_fast';
+  }
+  return recording.status; // 'attached' | 'dropped'
+}
+
 function App() {
-  const [beyStatus, setBeyStatus] = useState('idle');
-  const { wsStatus, device, recording, clearRecording } = useBleSocket();
+  // the recording whose animation already timed out back to idle
+  const [expiredRecording, setExpiredRecording] = useState(null);
+  const voiceRef = useRef(null);
+  const { wsStatus, device, recording, clearRecording } = useBleSocket({
+    onRecording: (rec) => {
+      if (rec.status === 'attached') {
+        voiceRef.current?.playTTS('3, 2, 1, go shoot!!!');
+      } else if (rec.status === 'dropped') {
+        voiceRef.current?.playTTS('Did you just drop your beyblade?');
+      } else if (rec.status === 'launched') {
+        const lastLaunch = rec.launchesValues.at(-1);
+
+        voiceRef.current?.playTTS(lastLaunch < 3000
+          ? 'that was a very sloppy launch!'
+          : 'wow fast launch right there!');
+      }
+    },
+  });
+
   console.log(wsStatus);
   console.log(device);
+
   useEffect(() => {
-    const t = setTimeout(() => {
-      setBeyStatus('disconnected');
-    }, 1000);
+    const delay = IDLE_AFTER_MS[recording?.status];
+    if (!delay) return;
 
-    // const t2 = setTimeout(() => {
-    //   setBeyStatus('spin_slow');
-    // }, 2000);
+    const idleTimeout = setTimeout(() => setExpiredRecording(recording), delay);
+    return () => clearTimeout(idleTimeout);
+  }, [recording]);
 
-    // const t3 = setTimeout(() => {
-    //   setBeyStatus('disconnected');
-    // }, 6000);
-
-    // const t4 = setTimeout(() => {
-    //   setBeyStatus('idle');
-    // }, 8000);
-
-    return () => {
-      clearTimeout(t);
-      // clearTimeout(t2);
-      // clearTimeout(t3);
-      // clearTimeout(t4);
-    };
-  }, []);
+  const beyStatus = getBeyStatus(recording, wsStatus, device, expiredRecording === recording);
 
   async function sendResetRequest() {
     const res = await fetch('/api/reset', { method: 'POST' });
     const data = await res.json();
 
     if (!res.ok) throw new Error(data.error);
-    
+
     if (data.message === 'RESET OK!') {
       clearRecording();
     }
@@ -80,7 +97,7 @@ function App() {
             <div className="gauge-bezel">
               <div className="gauge-ring">
                 <div className="gauge-lens">
-                  <VoiceFlare />
+                  <VoiceFlare ref={voiceRef} />
                 </div>
               </div>
               <div className="gauge-label gauge-label--top">100</div>
