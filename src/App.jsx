@@ -40,6 +40,8 @@ function App() {
         voiceRef.current?.playTTS(sample(['3, 2, 1, go shoot!!!', 'Let it rip!!!']));
       } else if (rec.status === 'dropped') {
         voiceRef.current?.playTTS('Did you just drop your beyblade?');
+      } else if (rec.status === 'reset') {
+        voiceRef.current?.playTTS('Reset successful!');
       }
     },
     onComment: (comment) => {

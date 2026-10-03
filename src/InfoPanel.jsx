@@ -121,7 +121,7 @@ function renderTerminalText(recording) {
           newScore={newHighScore}
         />
       </div>
-      {newHighScore ? <div style={{ textAlign: 'center' }}><p>WOW NEW SCORE!</p></div> : null}
+      {newHighScore ? <div style={{ textAlign: 'center' }}><p>WOW NEW SCORE! <span className="terminal-cursor">▒</span></p></div> : null}
       {newHighScore && <AsciiConfetti key={recording.lifetimeCounter} />}
     </>;
   } else if (recording.status === 'attached') {
@@ -134,7 +134,7 @@ function renderTerminalText(recording) {
     </>;
   } else if (recording.status === 'reset') {
     return <>
-      <p>&gt; The Beybattle Pass was successfully RESET! <span className="terminal-cursor">▒</span></p>
+      <p>&gt; The Beybattle Pass was RESET successfully! <span className="terminal-cursor">▒</span></p>
     </>;
   }
 }

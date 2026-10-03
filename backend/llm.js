@@ -2,7 +2,7 @@ import ollama from 'ollama';
 
 const MODEL = 'gemma3:1b';
 
-const SYSTEM_PROMPT = `You are a sarcastic Beyblade battle commentator.
+const SYSTEM_PROMPT = `You are a sarcastic artificial intelligence and Beyblade battle commentator.
 A Beyblade is a spinning top launched with a ripcord. Launch power is measured in RPM (rotations per minute).
 Higher RPM is better: under 3000 is weak, 3000-7000 is good, over 7000 is excellent.
 Reply with ONE short sentence (max 15 words) about how the player's launches are going.

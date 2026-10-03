@@ -4,7 +4,7 @@
   inset: 0;
   margin: auto;
   width: min(100vw, calc(100vh * (var(--stage-w) / var(--stage-h))));
-  height: min(100vh, calc(100vw * (var(--stage-h) / var(--stage-w))));
+  height: min(115vh, calc(115vw * (var(--stage-h) / var(--stage-w))));
   background: radial-gradient(120% 120% at 50% 45%, var(--navy-1) 0%, var(--navy-0) 60%, #000 100%);
   overflow: hidden;
 }
