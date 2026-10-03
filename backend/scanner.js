@@ -15,6 +15,11 @@ export async function sendReset() {
   await writeCharacteristic.writeAsync(Buffer.from([0x75]), true);
 }
 
+export async function getRecordings() {
+  if (!writeCharacteristic) throw new Error('Beyblade tool not connected');
+  await writeCharacteristic.writeAsync(Buffer.from([0x74]), true);
+}
+
 export function startBluetooth() {
   let dataStream = [];
   let flushTimer = undefined;

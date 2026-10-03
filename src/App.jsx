@@ -79,7 +79,8 @@ function App() {
         {/* HUD chrome */}
         <div className="hud">
           {/* decorative panel behind the title / gauge / ai-tab (style only) */}
-          <div className="side-panel" aria-hidden="true"></div>
+          <div className="side-panel-top" aria-hidden="true"></div>
+          <div className="side-panel-bottom" aria-hidden="true"></div>
 
           {/* title */}
           <div className="title-plate">

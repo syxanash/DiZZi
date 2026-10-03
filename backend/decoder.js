@@ -9,7 +9,7 @@ let globalCounter = undefined;
 const RESET_ACK_PAGE = 0xa1;
 
 export function battlepassDecoder(payload) {
-  // console.log(payload);
+  console.log(payload);
 
   const battlepass = {
     highScore: undefined,
