@@ -2,18 +2,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import './InfoPanel.css';
 
 const BLOCKS = '▁▂▃▄▅▆▇█';
-const MAX_COLS = 19;
-
-function bucket(values, maxCols) {
-  if (values.length <= maxCols) return values;
-  const size = values.length / maxCols;
-  const result = [];
-  for (let i = 0; i < maxCols; i++) {
-    const slice = values.slice(Math.floor(i * size), Math.floor((i + 1) * size));
-    result.push(slice.reduce((sum, v) => sum + v, 0) / slice.length);
-  }
-  return result;
-}
+const MAX_COLS = 16;
 
 function levelColor(level) {
   if (level <= 2) return '#f33';
@@ -22,16 +11,16 @@ function levelColor(level) {
   return 'rgb(51, 255, 75)';
 }
 
-function Sparkline({ values }) {
-  const cols = bucket(values, MAX_COLS);
-  const min = Math.min(...cols);
-  const max = Math.max(...cols);
+function toLevel(v, min, max) {
+  return Math.round(((v - min) / (max - min || 1)) * (BLOCKS.length - 1));
+}
+
+function Sparkline({ levels }) {
   return (
     <p className="sparkline">
-      {cols.map((v, i) => {
-        const level = Math.round(((v - min) / (max - min || 1)) * (BLOCKS.length - 1));
-        return <span key={i} style={{ color: levelColor(level) }}>{BLOCKS[level]}</span>;
-      })}
+      {levels.map((level, i) => (
+        <span key={i} style={{ color: levelColor(level) }}>{BLOCKS[level]}</span>
+      ))}
     </p>
   );
 }
@@ -107,13 +96,14 @@ function renderTerminalText(recording) {
   }
 
   if (recording.status === 'launched') {
+    const recent = recording.launchesValues.slice(-MAX_COLS);
+    const min = Math.min(...recent);
+    const max = Math.max(...recent);
+    const levels = recent.map((v) => toLevel(v, min, max));
+
     const newHighScore = isNewHighScore(recording);
     return <>
-      <p>&gt; Trend:</p>
-      {recording.launchesValues.length > 0 && <Sparkline values={recording.launchesValues} />}
-      <p>&gt; Launches: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span></p>
-      <p>&gt; Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
-      <p>&gt; Last score:</p>
+      <p>&gt; RPMs:</p>
       <div style={{ textAlign: 'center' }}>
         <ScoreCounter
           key={recording.lifetimeCounter}
@@ -121,7 +111,17 @@ function renderTerminalText(recording) {
           newScore={newHighScore}
         />
       </div>
-      {newHighScore ? <div style={{ textAlign: 'center' }}><p>WOW NEW SCORE! <span className="terminal-cursor">▒</span></p></div> : null}
+      {newHighScore ? <div style={{ textAlign: 'center', fontStyle: 'italic' }}><p>WOW NEW SCORE!</p></div> : null}
+      <p>&gt; <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span> launches:</p>
+      {recent.length > 0 && <Sparkline levels={levels} />}
+      <div className="prev-recordings">
+        {recent.map((item, i) => (
+          <span key={i} style={{ fontStyle: i === recent.length - 1 ? 'italic' : 'normal', color: levelColor(levels[i]) }}>
+            {item}
+          </span>
+        )).toReversed()}
+      </div>
+      <p>&gt; Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span> <span className="terminal-cursor">▒</span></p>
       {newHighScore && <AsciiConfetti key={recording.lifetimeCounter} />}
     </>;
   } else if (recording.status === 'attached') {
@@ -140,7 +140,6 @@ function renderTerminalText(recording) {
 }
 
 export default function InfoPanel({ recording }) {
-  console.log(recording);
   return (
     <div className="info-panel">
       <div className="terminal-window">
