@@ -28,7 +28,7 @@ app.post('/api/tts', async (req, res) => {
   res.send(buffer);
 });
 
-app.get('/api/recordings', async (req, res) => {
+app.post('/api/recordings', async (req, res) => {
   try {
     await getRecordings();
     res.json({ message: 'REQ SENT!' });

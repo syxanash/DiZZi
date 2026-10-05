@@ -55,6 +55,8 @@ export function battlepassDecoder(payload) {
     const bodyPages =
       payload.filter((item) => item[0].toString(16).match(/^b[0-7]/));
 
+    const liveRecording = payload.some((item) => item[0].toString(16).match(/^7[0-3]/));
+
     if (bodyPages.length !== 8) {
       throw Error("Pages incomplete!");
     }
@@ -81,7 +83,7 @@ export function battlepassDecoder(payload) {
       throw new Error("Checksum doesn't match!");
     };
 
-    battlepass.status = numEntries > 0 ? "launched" : "reset";
+    battlepass.status = liveRecording ? (numEntries > 0 ? "launched" : "reset") : 'history';
     battlepass.launchesValues = launches;
     battlepass.highScore = bodyPages[6].readUInt16LE(HIGHSCORE_BYTEPOS);
     battlepass.lifetimeCounter = bodyPages[6].readUInt16LE(COUNTER_BYTEPOS);

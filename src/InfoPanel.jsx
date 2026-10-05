@@ -95,7 +95,7 @@ function renderTerminalText(recording) {
     return last === highScore && last > previousBest;
   }
 
-  if (recording.status === 'launched') {
+  if (recording.status === 'launched' || recording.status === 'history') {
     const recent = recording.launchesValues.slice(-MAX_COLS);
     const min = Math.min(...recent);
     const max = Math.max(...recent);
@@ -103,14 +103,17 @@ function renderTerminalText(recording) {
 
     const newHighScore = isNewHighScore(recording);
     return <>
-      <p>&gt; Launch Power:</p>
-      <div style={{ textAlign: 'center' }}>
-        <ScoreCounter
-          key={recording.lifetimeCounter}
-          value={recording.launchesValues.at(-1)}
-          newScore={newHighScore}
-        />
-      </div>
+      {recording.status === 'launched' ?
+        <><p>&gt; Launch Power:</p>
+          <div style={{ textAlign: 'center' }}>
+            <ScoreCounter
+              key={recording.lifetimeCounter}
+              value={recording.launchesValues.at(-1)}
+              newScore={newHighScore}
+            />
+          </div></>
+        : <div style={{ textAlign: 'center' }}><p>Launches Recorded</p></div>
+      }
       {newHighScore ? <div style={{ textAlign: 'center', fontStyle: 'italic' }}><p>WOW NEW SCORE!</p></div> : null}
       <p>&gt; <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span> launches:</p>
       {recent.length > 0 && <Sparkline levels={levels} />}
@@ -140,6 +143,7 @@ function renderTerminalText(recording) {
 }
 
 export default function InfoPanel({ recording }) {
+  // console.log(recording);
   return (
     <div className="info-panel">
       <div className="terminal-window">

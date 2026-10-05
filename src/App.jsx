@@ -42,6 +42,8 @@ function App() {
         voiceRef.current?.playTTS('Did you just drop your beyblade?');
       } else if (rec.status === 'reset') {
         voiceRef.current?.playTTS('Reset successful!');
+      } else if (rec.status === 'history') {
+        voiceRef.current?.playTTS('LP data loaded successfully!');
       }
     },
     onComment: (comment) => {

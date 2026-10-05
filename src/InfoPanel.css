@@ -69,6 +69,7 @@
 
 .prev-recordings {
   padding-top: 15px;
+  padding-bottom: 15px;
   display: grid;
   grid-template-columns: repeat(6, max-content);
   column-gap: 1ch;
