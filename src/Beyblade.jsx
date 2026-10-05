@@ -1,6 +1,11 @@
+// this component was mostly vibe-coded
+
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import './Beyblade.css';
+
+const BASE_FOV = 40;
+const MIN_ASPECT = 1;
 
 const STATUS_TARGETS = {
   idle: { speed: 0.03, camY: 0.5, camZ: 5.5, tiltX: 0.2, lean: 0, gap: 1.5, lookY: -0.5 },
@@ -65,7 +70,7 @@ export default function Beyblade({ status }) {
   useEffect(() => {
     const container = containerRef.current;
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.1, 1000);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     container.appendChild(renderer.domElement);
@@ -162,8 +167,17 @@ export default function Beyblade({ status }) {
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
+        const aspect = width / height;
         renderer.setSize(width, height);
-        camera.aspect = width / height;
+        camera.aspect = aspect;
+
+        // on narrow containers widen the vertical fov so the sides don't get cropped
+        if (aspect < MIN_ASPECT) {
+          const halfH = Math.tan(THREE.MathUtils.degToRad(BASE_FOV / 2)) * MIN_ASPECT;
+          camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(halfH / aspect));
+        } else {
+          camera.fov = BASE_FOV;
+        }
         camera.updateProjectionMatrix();
       }
     });

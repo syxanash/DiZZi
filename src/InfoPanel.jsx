@@ -2,7 +2,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import './InfoPanel.css';
 
 const BLOCKS = '▁▂▃▄▅▆▇█';
-const MAX_COLS = 16;
+const MAX_COLS = 19;
 
 function levelColor(level) {
   if (level <= 2) return '#f33';
@@ -103,7 +103,7 @@ function renderTerminalText(recording) {
 
     const newHighScore = isNewHighScore(recording);
     return <>
-      <p>&gt; RPMs:</p>
+      <p>&gt; Launch Power:</p>
       <div style={{ textAlign: 'center' }}>
         <ScoreCounter
           key={recording.lifetimeCounter}
@@ -116,7 +116,7 @@ function renderTerminalText(recording) {
       {recent.length > 0 && <Sparkline levels={levels} />}
       <div className="prev-recordings">
         {recent.map((item, i) => (
-          <span key={i} style={{ fontStyle: i === recent.length - 1 ? 'italic' : 'normal', color: levelColor(levels[i]) }}>
+          <span key={i} style={{ color: levelColor(levels[i]) }} className={i === recent.length - 1 ? 'last-score-anim' : null}>
             {item}
           </span>
         )).toReversed()}

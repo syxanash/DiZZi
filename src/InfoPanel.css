@@ -1,5 +1,5 @@
 .info-panel {
-  flex: 1 1 50%;
+  flex: 1 1 60%;
   min-width: 0;
   display: flex;
   padding: 24px;
@@ -68,14 +68,29 @@
 }
 
 .prev-recordings {
+  padding-top: 15px;
   display: grid;
-  grid-template-columns: repeat(4, max-content);
+  grid-template-columns: repeat(6, max-content);
   column-gap: 1ch;
   justify-content: center;
 }
 
 .score-counter {
   font-size: clamp(80px, 12vw, 130px);
+}
+
+.last-score-anim {
+  animation: lastScore 0.4s steps(1) infinite;
+}
+
+@keyframes lastScore {
+  0% {
+    border: 1px solid rgb(129, 127, 127);
+  }
+
+  50% {
+    border: 1px solid rgb(51, 255, 75);
+  }
 }
 
 @keyframes newScore {
