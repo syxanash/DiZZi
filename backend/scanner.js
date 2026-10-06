@@ -54,8 +54,6 @@ export function startBluetooth() {
 
       console.log(`Connected to ${peripheralName}, GATT map below:`);
 
-      bleEvents.emit('device', 'connected');
-
       peripheral.once('disconnect', () => {
         console.log(`Bluetooth ${peripheralName} disconnected...`);
         bleEvents.emit('device', 'disconnected');
@@ -108,6 +106,8 @@ export function startBluetooth() {
           }
         }
       }
+
+      bleEvents.emit('device', 'connected');
     }
 
     // console.log('\n==========================================\n');

@@ -7,6 +7,8 @@ import { askBrain, warmUpBrain } from './llm.js';
 
 let deviceStatus = 'disconnected';
 
+const AI_ENABLED = process.env.AI_ENABLED === "true";
+
 const app = express();
 const server = createServer(app);
 
@@ -14,6 +16,10 @@ app.use(express.json());
 
 app.get('/', (_req, res) => {
   res.json({ message: 'Express is ok' });
+});
+
+app.get('/api/config', (_req, res) => {
+  res.json({ aiEnabled: AI_ENABLED });
 });
 
 app.post('/api/tts', async (req, res) => {
@@ -69,7 +75,7 @@ bleEvents.on('device', (device) => {
 bleEvents.on('recording', async (recording) => {
   broadcast({ type: 'recording', recording });
 
-  if (recording.status === 'launched') {
+  if (recording.status === 'launched' && AI_ENABLED) {
     try {
       const comment = await askBrain(recording);
 
@@ -86,9 +92,14 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
   startBluetooth();
 
-  // load both models in the background so the first launch isn't slow
-  getTTS().then(() => console.log('TTS model ready'));
-  warmUpBrain()
-    .then(() => console.log('LLM model ready'))
-    .catch((err) => console.error('LLM warm-up failed:', err.message));
+  if (process.env.AI_ENABLED === "true") {
+    console.log("Loading AI features...");
+    // load both models in the background so the first launch isn't slow
+    getTTS().then(() => console.log('TTS model ready'));
+    warmUpBrain()
+      .then(() => console.log('LLM model ready'))
+      .catch((err) => console.error('LLM warm-up failed:', err.message));
+  } else {
+    console.log("AI features DISABLED");
+  }
 });

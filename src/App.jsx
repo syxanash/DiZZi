@@ -42,11 +42,14 @@ const toggleFullSceen = () => {
 };
 
 function App() {
-  // the recording whose animation already timed out back to idle
   const [expiredRecording, setExpiredRecording] = useState(null);
+  const [aiEnabled, setAiEnabled] = useState(false);
+
   const voiceRef = useRef(null);
   const { wsStatus, device, recording, clearRecording } = useBleSocket({
     onRecording: (rec) => {
+      if (!aiEnabled) { return; }
+
       if (rec.status === 'attached') {
         voiceRef.current?.playTTS(sample(['3, 2, 1, go shoot!!!', 'Let it rip!!!']));
       } else if (rec.status === 'dropped') {
@@ -58,9 +61,17 @@ function App() {
       }
     },
     onComment: (comment) => {
+      if (!aiEnabled) { return; }
+
       voiceRef.current?.playTTS(comment);
     },
   });
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then((r) => r.json())
+      .then((cfg) => setAiEnabled(cfg.aiEnabled));
+  }, []);
 
   useEffect(() => {
     if (device === 'connected') {

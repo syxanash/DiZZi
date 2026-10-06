@@ -6,7 +6,7 @@
   "scripts": {
     "dev-start": "concurrently \"npm run dev\" \"npm run backend-start\"",
     "prod-start": "npm run build && concurrently \"npm run preview\" \"npm run backend-start\"",
-    "backend-start": "node backend/server.js",
+    "backend-start": "node --env-file-if-exists=.env.local backend/server.js",
     "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
