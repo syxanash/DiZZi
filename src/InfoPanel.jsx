@@ -156,7 +156,7 @@ export default function InfoPanel({ recording }) {
           {recording
             ? renderTerminalText(recording)
             : (
-              <p>&gt; Waiting for data... <span className="terminal-cursor">▒</span></p>
+              <p>&gt; Loading data... <span className="terminal-cursor">▒</span></p>
             )}
         </div>
       </div>

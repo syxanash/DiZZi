@@ -1,4 +1,4 @@
-// this component was mostly vibe-coded
+// VIBECODE: this component was mostly vibe-coded
 
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
