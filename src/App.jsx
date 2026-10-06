@@ -11,6 +11,17 @@ const IDLE_AFTER_MS = {
   launched: 15000,
 };
 
+async function requestRecordings() {
+  const res = await fetch('/api/recordings', { method: 'POST' });
+  const data = await res.json();
+
+  if (!res.ok) throw new Error(data.error);
+
+  if (data.message === 'REQ SENT!') {
+    console.log('Requested Recordings!');
+  }
+}
+
 function getBeyStatus(recording, wsStatus, device, isExpired) {
   if (wsStatus !== 'open' || device !== 'connected') return 'disconnected';
   if (!recording || recording.status === 'reset' || isExpired) return 'idle';
@@ -50,6 +61,12 @@ function App() {
       voiceRef.current?.playTTS(comment);
     },
   });
+
+  useEffect(() => {
+    if (device === 'connected') {
+      requestRecordings().catch(console.error);
+    }
+  }, [device]);
 
   useEffect(() => {
     const delay = IDLE_AFTER_MS[recording?.status];
