@@ -17,8 +17,8 @@ const STATUS_TARGETS = {
 };
 
 // Spacing multipliers applied to `gap`
-const RATCHET_GAP_SCALE = 0.67; // blade -> ratchet
-const BIT_GAP_SCALE = 1; // ratchet -> bit
+const RATCHET_GAP_SCALE = 0.85; // blade -> ratchet
+const BIT_GAP_SCALE = 1.2; // ratchet -> bit
 
 export default function Beyblade({ status }) {
 

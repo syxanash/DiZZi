@@ -1,4 +1,4 @@
-// VIBECODE: Voice flare canvas animation was vibecoded
+// VIBECODE: Voice flare canvas animation was fully AI generated
 
 import { useRef, useImperativeHandle } from 'react';
 
