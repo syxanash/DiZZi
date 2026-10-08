@@ -1,7 +1,7 @@
 
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
-export function useBleSocket({ url = 'ws://localhost:4567', onRecording, onComment } = {}) {
+export function useBleSocket({ url = `ws://${location.host}/ws`, onRecording, onComment } = {}) {
   const notifyRecording = useEffectEvent((rec) => onRecording?.(rec));
   const notifyComment = useEffectEvent((comment) => onComment?.(comment));
 
