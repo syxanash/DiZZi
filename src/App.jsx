@@ -44,10 +44,15 @@ const toggleFullSceen = () => {
 function App() {
   const [expiredRecording, setExpiredRecording] = useState(null);
   const [aiEnabled, setAiEnabled] = useState(false);
+  const [battery, setBattery] = useState(undefined);
 
   const voiceRef = useRef(null);
   const { wsStatus, device, recording, clearRecording } = useBleSocket({
     onRecording: (rec) => {
+      if (rec.battery != null && (rec.status === 'history' || rec.status === 'attached')) {
+        setBattery(Math.floor(rec.battery));
+      }
+
       if (!aiEnabled) { return; }
 
       if (rec.status === 'attached') {
@@ -138,8 +143,8 @@ function App() {
                   <VoiceFlare ref={voiceRef} />
                 </div>
               </div>
-              <div className="gauge-label gauge-label--top">100</div>
-              <div className="gauge-label gauge-label--bottom">100</div>
+              <div className="gauge-label gauge-label--top">{battery ?? '--'}</div>
+              <div className="gauge-label gauge-label--bottom">{battery ?? '--'}</div>
             </div>
           </div>
 

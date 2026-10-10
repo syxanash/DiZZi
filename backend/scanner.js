@@ -10,12 +10,17 @@ const writeChar = '55c4f001f8eb11ecb9390242ac120002';
 
 let writeCharacteristic = null;
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export async function sendReset() {
   if (!writeCharacteristic) throw new Error('Beyblade tool not connected');
   await writeCharacteristic.writeAsync(Buffer.from([0x75]), true);
 }
 
 export async function getRecordings() {
+  if (!writeCharacteristic) throw new Error('Beyblade tool not connected');
+  await writeCharacteristic.writeAsync(Buffer.from([0x51]), true);
+  await delay(700);
   if (!writeCharacteristic) throw new Error('Beyblade tool not connected');
   await writeCharacteristic.writeAsync(Buffer.from([0x74]), true);
 }
@@ -94,7 +99,7 @@ export function startBluetooth() {
                 dataStream = [];
 
                 processPayload(payload);
-              }, 700);
+              }, 1000);
             });
 
             await char.subscribeAsync();
