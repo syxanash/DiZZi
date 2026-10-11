@@ -62,22 +62,42 @@
   left: 3.6%;
   top: 7.2%;
   width: 24.5%;
-  height: 17%;
-  /* same look as .chrome */
+  height: 25%;
+
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55));
+  z-index: 4;
+}
+
+.title-plate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background:
     linear-gradient(160deg, var(--chrome-hi) 0%, var(--chrome-mid) 22%, var(--chrome-lo) 60%, #2b2f38 100%);
   border-radius: 30px;
   box-shadow:
     inset 0 3px 2px rgba(255, 255, 255, 0.35),
-    inset 0 -6px 10px rgba(0, 0, 0, 0.55),
-    0 10px 24px rgba(0, 0, 0, 0.55);
-  z-index: 4;
+    inset 0 -6px 10px rgba(0, 0, 0, 0.55);
+  /* fallback for browsers without shape() */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 100%, 30% 67.2%, 0 67.2%);
+
+  clip-path: shape(
+    from 0 0,
+    line to 100% 0,
+    line to 100% 100%,
+    line to 50% 100%,
+    line to 35% 84.1%,
+    curve to 24% 67.2% with 30% 67.2%,
+    line to 30px 67.2%,
+    curve to 0 calc(67.2% - 30px) with 0 67.2%,
+    close
+  );
 }
 
 .title-pill {
   position: absolute;
-  inset: 16% 10% auto 10%;
-  height: 62%;
+  inset: 10.9% 8% auto 8%;
+  height: 42%;
   border-radius: 30px;
   background:
     linear-gradient(180deg, var(--glass-blue-hi) 0%, var(--glass-blue-lo) 45%, #1b2f57 100%);
@@ -93,7 +113,7 @@
 .title-text {
   font-family: "Orbitron", "Arial Black", sans-serif;
   font-weight: 800;
-  font-size: clamp(18px, 4.2vw, 62px);
+  font-size: clamp(18px, 4vw, 62px);
   letter-spacing: 0.02em;
   color: var(--accent-yellow);
   text-shadow:
