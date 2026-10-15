@@ -19,7 +19,9 @@ async function requestRecordings() {
 
   if (data.message === 'REQ SENT!') {
     console.log('Requested Recordings!');
+    return true;
   }
+  return false;
 }
 
 function getBeyStatus(recording, wsStatus, device, isExpired) {
@@ -45,6 +47,7 @@ function App() {
   const [expiredRecording, setExpiredRecording] = useState(null);
   const [aiEnabled, setAiEnabled] = useState(false);
   const [battery, setBattery] = useState(undefined);
+  const [requested, setRequested] = useState(false);
 
   const voiceRef = useRef(null);
   const { wsStatus, device, recording, clearRecording } = useBleSocket({
@@ -80,7 +83,9 @@ function App() {
 
   useEffect(() => {
     if (device === 'connected') {
-      requestRecordings().catch(console.error);
+      requestRecordings().then(setRequested).catch(console.error);
+    } else {
+      setRequested(false);
     }
   }, [device]);
 
@@ -152,7 +157,7 @@ function App() {
             <div className="beyblade-side">
               <Beyblade status={beyStatus} />
             </div>
-            <InfoPanel recording={recording} />
+            <InfoPanel recording={recording} requested={requested} />
           </div>
         </div>
       </div>

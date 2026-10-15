@@ -52,6 +52,37 @@
   text-shadow: 0 0 6px rgba(51, 255, 102, 0.6);
 }
 
+.terminal-loader {
+  color: rgb(255, 231, 51)
+}
+
+.centered-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.loaderbar-container {
+  margin-top: 20px;
+  border: 1px solid rgb(255, 231, 51);
+  width: 120%;
+  margin-left: -10%;
+  height: 40px;
+}
+
+.loaderbar-content {
+  background-image: linear-gradient(to bottom, #f4ff00, #76903e, #f4ff00);
+  width: 0%;
+  height: 100%;
+  transition: width 4s ease-out;
+}
+
+.loaderbar-content.loaderbar-finish {
+  transition: width 0.3s linear;
+}
+
 .terminal p {
   margin: 0;
 }

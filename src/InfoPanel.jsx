@@ -100,6 +100,7 @@ function renderTerminalText(recording) {
     const min = Math.min(...recent);
     const max = Math.max(...recent);
     const levels = recent.map((v) => toLevel(v, min, max));
+    const average = Math.round(recording.launchesValues.reduce((a, b) => a + b, 0) / recording.launchesValues.length);
 
     const newHighScore = isNewHighScore(recording);
     return <>
@@ -124,26 +125,55 @@ function renderTerminalText(recording) {
           </span>
         )).toReversed()}
       </div>
-      <p>&gt; Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span> <span className="terminal-cursor">▒</span></p>
+      <p>&gt; Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
+      <p>&gt; Average: <span style={{ color: 'rgb(51, 221, 255)' }}>{average}</span> <span className="terminal-cursor">▒</span></p>
       {newHighScore && <AsciiConfetti key={recording.lifetimeCounter} />}
     </>;
   } else if (recording.status === 'attached') {
-    return <>
-      <p><span style={{ color: 'rgb(51, 255, 75)' }}>&gt; LET IT RIP!!! <span className="terminal-cursor">▒</span></span></p>
-    </>;
+    return <div className='centered-text'>
+      <p><span style={{ color: 'rgb(51, 255, 75)' }}>LET IT RIP!!! <span className="terminal-cursor">▒</span></span></p>
+    </div>;
   } else if (recording.status === 'dropped') {
-    return <>
-      <p><span style={{ color: '#f33' }}>&gt; DID YOU DROP YOUR BEYBLADE? :( <span className="terminal-cursor">▒</span></span></p>
-    </>;
+    return <div className='centered-text'>
+      <p><span style={{ color: '#f33' }}>DID YOU DROP YOUR BEYBLADE? <span className="terminal-cursor">▒</span></span></p>
+    </div>;
   } else if (recording.status === 'reset') {
-    return <>
-      <p>&gt; The Beybattle Pass was RESET successfully! <span className="terminal-cursor">▒</span></p>
-    </>;
+    return <div className='centered-text'>
+      <p>RESET COMPLETED! <span className="terminal-cursor">▒</span></p>
+    </div>;
   }
 }
 
-export default function InfoPanel({ recording }) {
-  // console.log(recording);
+function LoaderScreen({ started, loaded, onDone }) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!started) return;
+    const frame = requestAnimationFrame(() => setProgress((p) => Math.max(p, 95)));
+    return () => cancelAnimationFrame(frame);
+  }, [started]);
+
+  useEffect(() => {
+    if (loaded) setProgress(100);
+  }, [loaded]);
+
+  return <div className='terminal-loader centered-text'>
+    <span>Loading data...</span>
+    <div className='loaderbar-container'>
+      <div
+        className={`loaderbar-content${progress === 100 ? ' loaderbar-finish' : ''}`}
+        style={{ width: `${progress}%` }}
+        onTransitionEnd={() => progress === 100 && onDone()}
+      />
+    </div>
+  </div>;
+}
+
+export default function InfoPanel({ recording, requested }) {
+  const [loaderDone, setLoaderDone] = useState(false);
+
+  if (!recording && loaderDone) setLoaderDone(false);
+
   return (
     <div className="info-panel">
       <div className="terminal-window">
@@ -153,11 +183,10 @@ export default function InfoPanel({ recording }) {
           <span className="terminal-btn">✕</span>
         </div>
         <div className="terminal">
-          {recording
+          {recording && loaderDone
             ? renderTerminalText(recording)
-            : (
-              <p>&gt; Loading data... <span className="terminal-cursor">▒</span></p>
-            )}
+            : <LoaderScreen started={requested} loaded={!!recording} onDone={() => setLoaderDone(true)} />
+          }
         </div>
       </div>
     </div>
