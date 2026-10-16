@@ -1,6 +1,10 @@
 # DiZZi 0.2 [![blog](https://raw.githubusercontent.com/syxanash/awesome-web-desktops/refs/heads/main/assets/notebook.png)](https://blog.simone.computer/reverse-beyblade-spin-counter)
 
-LET IT RIP!
+This is [DiZZi](https://beyblade.fandom.com/wiki/Dizzi) the the Kenny's AI companion from Beyblade 2001 Anime. This webapp will connect to a Beybattle Pass [BX-09](https://beyblade.fandom.com/wiki/Beybattle_Pass) show your Shoot Power data and also roast your launches.
+
+## Screenshot
+
+![screenshot](external-assets/dizzi.png)
 
 ## Setup and Installation
 
@@ -16,8 +20,7 @@ cd dizzi
 ### 2. Install Node dependencies
 
 ```sh
-nvm use
-npm i
+nvm use && npm i
 ```
 
 ### 3. Set up Ollama
