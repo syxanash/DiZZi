@@ -105,7 +105,7 @@ function renderTerminalText(recording) {
     const newHighScore = isNewHighScore(recording);
     return <>
       {recording.status === 'launched' ?
-        <><p>&gt; Launch Power:</p>
+        <><p>Launch Power:</p>
           <div style={{ textAlign: 'center' }}>
             <ScoreCounter
               key={recording.lifetimeCounter}
@@ -116,7 +116,7 @@ function renderTerminalText(recording) {
         : <div style={{ textAlign: 'center' }}><p>Launches Recorded</p></div>
       }
       {newHighScore ? <div style={{ textAlign: 'center', fontStyle: 'italic' }}><p>WOW NEW SCORE!</p></div> : null}
-      <p>&gt; <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span> launches:</p>
+      <p><span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span> launches:</p>
       {recent.length > 0 && <Sparkline levels={levels} />}
       <div className="prev-recordings">
         {recent.map((item, i) => (
@@ -125,8 +125,10 @@ function renderTerminalText(recording) {
           </span>
         )).toReversed()}
       </div>
-      <p>&gt; Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
-      <p>&gt; Average: <span style={{ color: 'rgb(51, 221, 255)' }}>{average}</span> <span className="terminal-cursor">▒</span></p>
+      <div className="stats-row">
+        <p>Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
+        <p>Average: <span style={{ color: 'rgb(51, 221, 255)' }}>{average}</span></p>
+      </div>
       {newHighScore && <AsciiConfetti key={recording.lifetimeCounter} />}
     </>;
   } else if (recording.status === 'attached') {

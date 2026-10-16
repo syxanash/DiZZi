@@ -8,9 +8,21 @@ const peripheralName = 'BEYBLADE_TOOL01';
 const subChar = '55c4f002f8eb11ecb9390242ac120002';
 const writeChar = '55c4f001f8eb11ecb9390242ac120002';
 
+const CONNECT_TIMEOUT_MS = 10000;
+const READ_TIMEOUT_MS = 3000;
+
 let writeCharacteristic = null;
+let connecting = false;
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function withTimeout(promise, ms, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 export async function sendReset() {
   if (!writeCharacteristic) throw new Error('Beyblade tool not connected');
@@ -53,9 +65,12 @@ export function startBluetooth() {
 
     console.log(`Found: ${name} | RSSI: ${peripheral.rssi}`);
 
-    if (name === peripheralName) {
+    if (name !== peripheralName || connecting) return;
+    connecting = true;
+
+    try {
       await noble.stopScanningAsync();
-      await peripheral.connectAsync();
+      await withTimeout(peripheral.connectAsync(), CONNECT_TIMEOUT_MS, 'connect');
 
       console.log(`Connected to ${peripheralName}, GATT map below:`);
 
@@ -63,15 +78,16 @@ export function startBluetooth() {
         console.log(`Bluetooth ${peripheralName} disconnected...`);
         bleEvents.emit('device', 'disconnected');
         writeCharacteristic = null;
+        connecting = false;
         noble.startScanningAsync([], false);
       });
 
-      const services = await peripheral.discoverServicesAsync([]);
+      const services = await withTimeout(peripheral.discoverServicesAsync([]), CONNECT_TIMEOUT_MS, 'discover services');
 
       for (const service of services) {
         console.log(`\nService UUID: ${service}`);
 
-        const characteristics = await service.discoverCharacteristicsAsync([]);
+        const characteristics = await withTimeout(service.discoverCharacteristicsAsync([]), CONNECT_TIMEOUT_MS, 'discover characteristics');
 
         for (const char of characteristics) {
           console.log(`  └─ Characteristic: ${char.uuid}`);
@@ -79,7 +95,7 @@ export function startBluetooth() {
 
           if (char.properties.includes('read')) {
             try {
-              const data = await char.readAsync();
+              const data = await withTimeout(char.readAsync(), READ_TIMEOUT_MS, 'read');
               console.log(`     Read Value:     ${Buffer.from(data.toString('hex'), 'hex').toString('utf8')}`);
             } catch (e) {
               console.log(`     Read Value:     Failed to read (${e.message})`);
@@ -102,7 +118,7 @@ export function startBluetooth() {
               }, 1000);
             });
 
-            await char.subscribeAsync();
+            await withTimeout(char.subscribeAsync(), CONNECT_TIMEOUT_MS, 'subscribe');
             console.log(`Subscribed to: ${subChar}`);
           }
 
@@ -112,7 +128,17 @@ export function startBluetooth() {
         }
       }
 
+      // the link may have dropped while we were still discovering
+      if (peripheral.state !== 'connected') throw new Error('peripheral disconnected during setup');
+
       bleEvents.emit('device', 'connected');
+    } catch (err) {
+      console.error(`BLE setup failed: ${err.message}, retrying...`);
+      writeCharacteristic = null;
+      peripheral.removeAllListeners('disconnect');
+      connecting = false;
+      peripheral.disconnectAsync().catch(() => {});
+      noble.startScanningAsync([], false);
     }
 
     // console.log('\n==========================================\n');

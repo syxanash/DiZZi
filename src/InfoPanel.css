@@ -201,3 +201,13 @@
     display: none;
   }
 }
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 2ch;
+  justify-content: space-between;
+}
+
+.stats-row p {
+  white-space: nowrap;
+}
