@@ -1,14 +1,20 @@
 # DiZZi 0.2 [![blog](https://raw.githubusercontent.com/syxanash/awesome-web-desktops/refs/heads/main/assets/notebook.png)](https://blog.simone.computer/reverse-beyblade-spin-counter)
 
-This is [DiZZi](https://beyblade.fandom.com/wiki/Dizzi) the the Kenny's AI companion from Beyblade 2001 Anime. This webapp will connect to a Beybattle Pass [BX-09](https://beyblade.fandom.com/wiki/Beybattle_Pass) show your Shoot Power data and also roast your launches.
+[DiZZi](https://beyblade.fandom.com/wiki/Dizzi) is Kenny's AI companion from the 2001 Beyblade anime, brought back as a web app.
+It connects to a [Beybattle Pass BX-09](https://beyblade.fandom.com/wiki/Beybattle_Pass), shows your Shoot Power data, and roasts your launches.
 
 ## Screenshot
 
 ![screenshot](external-assets/dizzi.png)
 
-## Setup and Installation
+## Requirements
 
-Follow these steps to get DiZZi set up and ready to run.
+- Node 24 (version pinned in `.nvmrc`) and [nvm](https://github.com/nvm-sh/nvm)
+- A Beybattle Pass BX-09
+- A computer with Bluetooth (uses [`@abandonware/noble`](https://github.com/abandonware/noble) to talk to the Pass)
+- [Ollama](https://ollama.com/download), only needed if you enable the AI features
+
+## Setup and Installation
 
 ### 1. Clone the repository
 
@@ -23,9 +29,11 @@ cd dizzi
 nvm use && npm i
 ```
 
-### 3. Set up Ollama
+### 3. Set up Ollama (optional)
 
-After [installing Ollama](https://ollama.com/download/linux), pull the necessary language models:
+Skip this step if you leave `AI_ENABLED=false`.
+
+After [installing Ollama](https://ollama.com/download), pull the language model:
 
 ```sh
 ollama pull gemma3:1b
@@ -33,39 +41,49 @@ ollama pull gemma3:1b
 
 ## Configure
 
-Before starting the app, you need to configure the following variables in your `.env` file:
+Create a `.env` file in the project root (`.env.local` is also loaded, for local overrides):
 
 ```
 AI_ENABLED=true
-BACKEND_PORT=4568
+BACKEND_PORT=4567
 ```
 
-You can decide if you'd like to enable the AI features: Kokoro text to speech or Gemma 3 commenting on your launches.
+| Variable       | Default | Description                                                                 |
+|----------------|---------|-----------------------------------------------------------------------------|
+| `AI_ENABLED`   | `false` | Enables the AI features: Kokoro text-to-speech and Gemma 3 launch comments |
+| `BACKEND_PORT` | `4567`  | Port of the backend server; the frontend proxies `/api` and `/ws` to it    |
 
 ## Usage
 
-To start the DiZZi, run the following command from the root of the project directory:
+To start DiZZi, run this from the root of the project:
 
 ```sh
 npm run prod-start
 ```
 
-You should now be able to see the app running on localhost.
-For development instead run:
+Then open [http://localhost:4173](http://localhost:4173).
+
+For development, with hot reload, run:
 
 ```sh
 npm run dev-start
 ```
 
+Then open [http://localhost:5173](http://localhost:5173).
+
 ## Architecture
 
 ![architecture](external-assets/beyblade-arch.png)
 
-## Demo
+The Node backend reads launch data from the Beybattle Pass over Bluetooth LE and streams it to the React frontend over a WebSocket. When AI is enabled, the backend asks Gemma 3 (via Ollama) to comment on each launch, and Kokoro reads the comment out loud.
 
+## Troubleshooting
 
+- **The Battlepass isn't found:** make sure Bluetooth is on, the Battlepass is awake and nearby, and (on macOS) your terminal has Bluetooth permission.
+- **No AI comments:** check that `AI_ENABLED=true` is set, that Ollama is running, and that `gemma3:1b` has been pulled.
+- **Frontend can't reach the backend:** make sure `BACKEND_PORT` is the same for both, and that nothing else is using that port.
 
 ## External resources
 
-* Text to speech model used: [Kokoro.js](https://huggingface.co/posts/Xenova/503648859052804)
-* [Gemma 3:1b](https://ollama.com/library/gemma3) pulled from Ollama.
+* Text-to-speech model: [Kokoro.js](https://huggingface.co/posts/Xenova/503648859052804)
+* LLM: [Gemma 3:1b](https://ollama.com/library/gemma3), pulled from Ollama
