@@ -3,6 +3,7 @@ import './InfoPanel.css';
 
 const BLOCKS = '▁▂▃▄▅▆▇█';
 const MAX_COLS = 19;
+const MAX_VISIBLE_RECORDINGS = 9;
 
 function levelColor(level) {
   if (level <= 2) return '#f33';
@@ -87,6 +88,40 @@ const ScoreCounter = memo(function ScoreCounter({ value, duration = 800, newScor
   );
 });
 
+function HistoricalData({ levels, values }) {
+  const [showMore, setShowMore] = useState(false);
+  const collapsed = values.length > MAX_VISIBLE_RECORDINGS && !showMore;
+
+  const items = values.map((item, i) => (
+    <span key={i} style={{ color: levelColor(levels[i]) }} className={i === values.length - 1 ? 'last-score-anim' : null}>
+      {item}
+    </span>
+  )).toReversed();
+
+  return (
+    <div className="prev-recordings">
+      {collapsed ? items.slice(0, MAX_VISIBLE_RECORDINGS) : items}
+      {collapsed && (
+        <button
+          type="button"
+          onClick={() => setShowMore(true)}
+          style={{
+            color: 'rgb(51, 221, 255)',
+            textDecoration: 'underline',
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            font: 'inherit',
+            cursor: 'pointer',
+          }}
+        >
+          ...
+        </button>
+      )}
+    </div>
+  );
+}
+
 function renderTerminalText(recording) {
   function isNewHighScore({ launchesValues, highScore }) {
     const last = launchesValues.at(-1);
@@ -100,7 +135,10 @@ function renderTerminalText(recording) {
     const min = Math.min(...recent);
     const max = Math.max(...recent);
     const levels = recent.map((v) => toLevel(v, min, max));
-    const average = Math.round(recording.launchesValues.reduce((a, b) => a + b, 0) / recording.launchesValues.length);
+    const allMin = Math.min(...recording.launchesValues);
+    const allMax = Math.max(...recording.launchesValues);
+    const allLevels = recording.launchesValues.map((v) => toLevel(v, allMin, allMax));
+    const average = recording.launchesValues.length === 0 ? 0 : Math.round(recording.launchesValues.reduce((a, b) => a + b, 0) / recording.launchesValues.length);
 
     const newHighScore = isNewHighScore(recording);
     return <>
@@ -118,13 +156,7 @@ function renderTerminalText(recording) {
       {newHighScore ? <div style={{ textAlign: 'center', fontStyle: 'italic' }}><p>WOW NEW SCORE!</p></div> : null}
       <p><span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span> launches:</p>
       {recent.length > 0 && <Sparkline levels={levels} />}
-      <div className="prev-recordings">
-        {recent.map((item, i) => (
-          <span key={i} style={{ color: levelColor(levels[i]) }} className={i === recent.length - 1 ? 'last-score-anim' : null}>
-            {item}
-          </span>
-        )).toReversed()}
-      </div>
+      <HistoricalData levels={allLevels} values={recording.launchesValues} />
       <div className="stats-row">
         <p>Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
         <p>Average: <span style={{ color: 'rgb(51, 221, 255)' }}>{average}</span></p>
