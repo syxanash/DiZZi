@@ -3,7 +3,7 @@ import './InfoPanel.css';
 
 const BLOCKS = '▁▂▃▄▅▆▇█';
 const MAX_COLS = 19;
-const MAX_VISIBLE_RECORDINGS = 9;
+const MAX_VISIBLE_RECORDINGS = 10;
 
 function levelColor(level) {
   if (level <= 2) return '#f33';
@@ -16,12 +16,37 @@ function toLevel(v, min, max) {
   return Math.round(((v - min) / (max - min || 1)) * (BLOCKS.length - 1));
 }
 
-function Sparkline({ levels }) {
+function useColumns(ref, probeRef, maxCols) {
+  const [cols, setCols] = useState(maxCols);
+
+  useEffect(() => {
+    const el = ref.current;
+    const ro = new ResizeObserver(([entry]) => {
+      const charWidth = probeRef.current.getBoundingClientRect().width || 1;
+      setCols(Math.max(1, Math.min(maxCols, Math.floor(entry.contentRect.width / charWidth))));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref, probeRef, maxCols]);
+
+  return cols;
+}
+
+function Sparkline({ values }) {
+  const ref = useRef(null);
+  const probeRef = useRef(null);
+  const cols = useColumns(ref, probeRef, MAX_COLS);
+  const recent = values.slice(-cols);
+  const min = Math.min(...recent);
+  const max = Math.max(...recent);
+
   return (
-    <p className="sparkline">
-      {levels.map((level, i) => (
-        <span key={i} style={{ color: levelColor(level) }}>{BLOCKS[level]}</span>
-      ))}
+    <p ref={ref} className="sparkline">
+      <span ref={probeRef} className="sparkline-probe" aria-hidden="true">{BLOCKS.at(-1)}</span>
+      {recent.map((v, i) => {
+        const level = toLevel(v, min, max);
+        return <span key={i} style={{ color: levelColor(level) }}>{BLOCKS[level]}</span>;
+      })}
     </p>
   );
 }
@@ -131,10 +156,6 @@ function renderTerminalText(recording) {
   }
 
   if (recording.status === 'launched' || recording.status === 'history') {
-    const recent = recording.launchesValues.slice(-MAX_COLS);
-    const min = Math.min(...recent);
-    const max = Math.max(...recent);
-    const levels = recent.map((v) => toLevel(v, min, max));
     const allMin = Math.min(...recording.launchesValues);
     const allMax = Math.max(...recording.launchesValues);
     const allLevels = recording.launchesValues.map((v) => toLevel(v, allMin, allMax));
@@ -155,7 +176,7 @@ function renderTerminalText(recording) {
       }
       {newHighScore ? <div style={{ textAlign: 'center', fontStyle: 'italic' }}><p>WOW NEW SCORE!</p></div> : null}
       <p><span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span> launches:</p>
-      {recent.length > 0 && <Sparkline levels={levels} />}
+      {recording.launchesValues.length > 0 && <Sparkline values={recording.launchesValues} />}
       <HistoricalData levels={allLevels} values={recording.launchesValues} />
       <div className="stats-row">
         <p>Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
