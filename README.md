@@ -1,4 +1,4 @@
-# DiZZi 0.2 [![blog](https://raw.githubusercontent.com/syxanash/awesome-web-desktops/refs/heads/main/assets/notebook.png)](https://blog.simone.computer/reverse-beyblade-spin-counter)
+# DiZZi 0.2 [![blog](https://raw.githubusercontent.com/syxanash/awesome-web-desktops/refs/heads/main/assets/notebook.png)](https://blog.simone.computer/reverse-beyblade-launch-tracker)
 
 [DiZZi](https://beyblade.fandom.com/wiki/Dizzi) is Kenny's AI companion from the 2001 Beyblade anime, brought back as a web app.
 It connects to a [Beybattle Pass BX-09](https://beyblade.fandom.com/wiki/Beybattle_Pass), shows your Shoot Power data, and roasts your launches.
