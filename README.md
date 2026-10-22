@@ -71,6 +71,12 @@ npm run dev-start
 
 Then open [http://localhost:5173](http://localhost:5173).
 
+## Resetting Scores
+
+If you click the tiny square button with the cross in it (beside the logo) you will wipe the entire Beybattle Pass internal database and start counting all scores from scratch.
+
+![reset](external-assets/reset.png)
+
 ## Architecture
 
 ![architecture](external-assets/beyblade-arch.png)
