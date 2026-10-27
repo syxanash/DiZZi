@@ -1,4 +1,10 @@
 import ollama from 'ollama';
+import OpenAI from 'openai';
+
+const SPEECH_MODEL = 'phonon';
+const SPEECH_VOICE = 'Juniper';
+
+const openai = new OpenAI({ baseURL: 'http://localhost:11434/v1', apiKey: 'ollama' });
 
 const MODEL = 'gemma3:1b';
 
@@ -10,6 +16,16 @@ Reply with ONE short sentence (max 15 words) about how the player's launches are
 
 Example: "Huge jump to 8200 RPM, that's a monster launch!"
 Example: "Dropped to 2500 RPM, pull that ripcord harder!"`;
+
+export async function speak(text, voice = SPEECH_VOICE) {
+  const response = await openai.audio.speech.create({
+    model: SPEECH_MODEL,
+    voice,
+    input: text,
+    response_format: 'wav',
+  });
+  return Buffer.from(await response.arrayBuffer());
+}
 
 function describeLaunches(launchesValues) {
   const lastItem = launchesValues.at(-1);

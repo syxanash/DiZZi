@@ -1,9 +1,8 @@
 import express from 'express';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
-import { getTTS } from './tts.js';
 import { startBluetooth, bleEvents, sendReset, getRecordings } from './scanner.js';
-import { askBrain, warmUpBrain } from './llm.js';
+import { askBrain, warmUpBrain, speak } from './llm.js';
 
 let deviceStatus = 'disconnected';
 
@@ -23,15 +22,16 @@ app.get('/api/config', (_req, res) => {
 });
 
 app.post('/api/tts', async (req, res) => {
-  const { text, voice = 'af_heart' } = req.body;
+  const { text, voice } = req.body;
   if (!text) return res.status(400).json({ error: 'text is required' });
 
-  const tts = await getTTS();
-  const audio = await tts.generate(text, { voice });
-  const buffer = Buffer.from(audio.toWav());
-
-  res.set('Content-Type', 'audio/wav');
-  res.send(buffer);
+  try {
+    const wav = await speak(text, voice);
+    res.set('Content-Type', 'audio/wav');
+    res.send(wav);
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
 });
 
 app.post('/api/recordings', async (req, res) => {
@@ -95,7 +95,10 @@ server.listen(PORT, '0.0.0.0', () => {
   if (process.env.AI_ENABLED === "true") {
     console.log("Loading AI features...");
     // load both models in the background so the first launch isn't slow
-    getTTS().then(() => console.log('TTS model ready'));
+    speak("hello")
+      .then(() => { console.log('Voice model ready'); })
+      .catch((err) => console.error('Voice model warm-up failed: ', err.message));
+
     warmUpBrain()
       .then(() => console.log('LLM model ready'))
       .catch((err) => console.error('LLM warm-up failed:', err.message));

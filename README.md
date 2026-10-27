@@ -33,10 +33,11 @@ nvm use && npm i
 
 Skip this step if you leave `AI_ENABLED=false`.
 
-After [installing Ollama](https://ollama.com/download), pull the language model:
+After [installing Ollama](https://ollama.com/download), pull the language and speech models:
 
 ```sh
 ollama pull gemma3:1b
+ollama pull phonon
 ```
 
 ## Configure
@@ -50,7 +51,7 @@ BACKEND_PORT=4567
 
 | Variable       | Default | Description                                                                 |
 |----------------|---------|-----------------------------------------------------------------------------|
-| `AI_ENABLED`   | `false` | Enables the AI features: Kokoro text-to-speech and Gemma 3 launch comments |
+| `AI_ENABLED`   | `false` | Enables the AI features: Phonon text-to-speech and Gemma 3 launch comments |
 | `BACKEND_PORT` | `4567`  | Port of the backend server; the frontend proxies `/api` and `/ws` to it    |
 
 ## Usage
@@ -81,15 +82,16 @@ If you click the tiny square button with the cross in it (beside the logo) you w
 
 ![architecture](external-assets/beyblade-arch.png)
 
-The Node backend reads launch data from the Beybattle Pass over Bluetooth LE and streams it to the React frontend over a WebSocket. When AI is enabled, the backend asks Gemma 3 (via Ollama) to comment on each launch, and Kokoro reads the comment out loud.
+The Node backend reads launch data from the Beybattle Pass over Bluetooth LE and streams it to the React frontend over a WebSocket. When AI is enabled, the backend asks Gemma 3 (via Ollama) to comment on each launch, and Phonon (also via Ollama) reads the comment out loud.
 
 ## Troubleshooting
 
 - **The Battlepass isn't found:** make sure Bluetooth is on, the Battlepass is awake and nearby, and (on macOS) your terminal has Bluetooth permission.
 - **No AI comments:** check that `AI_ENABLED=true` is set, that Ollama is running, and that `gemma3:1b` has been pulled.
+- **Comments show up but there's no voice:** check that `phonon` has been pulled with `ollama pull phonon`.
 - **Frontend can't reach the backend:** make sure `BACKEND_PORT` is the same for both, and that nothing else is using that port.
 
 ## External resources
 
-* Text-to-speech model: [Kokoro.js](https://huggingface.co/posts/Xenova/503648859052804)
+* Text-to-speech model: [Phonon](https://ollama.com/library/phonon), pulled from Ollama
 * LLM: [Gemma 3:1b](https://ollama.com/library/gemma3), pulled from Ollama
