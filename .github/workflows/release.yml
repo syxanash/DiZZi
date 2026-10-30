@@ -1,0 +1,31 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write   # lets GITHUB_TOKEN create releases
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - run: npm run build
+      - run: npx electron-builder --publish ${{ github.ref_type == 'tag' && 'always' || 'never' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dizzi-${{ matrix.os }}
+          path: |
+            dist-electron/*.dmg
+            dist-electron/*.exe
