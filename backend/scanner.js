@@ -11,8 +11,12 @@ const writeChar = '55c4f001f8eb11ecb9390242ac120002';
 const CONNECT_TIMEOUT_MS = 10000;
 const READ_TIMEOUT_MS = 3000;
 
+const HEADER_FLUSH_MS = 150; // lone a0 events (attach/drop)
+const BODY_FLUSH_MS = 1000;
+
 let writeCharacteristic = null;
 let connecting = false;
+let expectingHistory = false;
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -34,7 +38,14 @@ export async function getRecordings() {
   await writeCharacteristic.writeAsync(Buffer.from([0x51]), true);
   await delay(700);
   if (!writeCharacteristic) throw new Error('Beyblade tool not connected');
-  await writeCharacteristic.writeAsync(Buffer.from([0x74]), true);
+  // set before writing: notifications can arrive before the write is ACKed
+  expectingHistory = true;
+  try {
+    await writeCharacteristic.writeAsync(Buffer.from([0x74]), true);
+  } catch (err) {
+    expectingHistory = false;
+    throw err;
+  }
 }
 
 export function startBluetooth() {
@@ -79,6 +90,7 @@ export function startBluetooth() {
         bleEvents.emit('device', 'disconnected');
         writeCharacteristic = null;
         connecting = false;
+        expectingHistory = false;
         noble.startScanningAsync([], false);
       });
 
@@ -103,19 +115,23 @@ export function startBluetooth() {
           }
 
           if (char.uuid == subChar) {
+            function flush() {
+              clearTimeout(flushTimer);
+              expectingHistory = false;
+              const payload = dataStream;
+              dataStream = [];
+              if (payload.length) processPayload(payload);
+            }
+
             char.on('data', (data) => {
               dataStream.push(data);
-
               clearTimeout(flushTimer);
-              flushTimer = setTimeout(() => {
-                // const formattedDate = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
-                // const payload = {[formattedDate]: dataStream };
 
-                const payload = dataStream;
-                dataStream = [];
+              const lastPage = expectingHistory ? 0xb7 : 0x73;
+              if (data[0] === lastPage) return flush();
 
-                processPayload(payload);
-              }, 1000);
+              const midBody = dataStream.some((page) => page[0] !== 0xa0);
+              flushTimer = setTimeout(flush, midBody ? BODY_FLUSH_MS : HEADER_FLUSH_MS);
             });
 
             await withTimeout(char.subscribeAsync(), CONNECT_TIMEOUT_MS, 'subscribe');
