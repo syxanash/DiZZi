@@ -8,7 +8,19 @@ permissions:
   contents: write   # lets GITHUB_TOKEN create releases
 
 jobs:
+  # create the draft once up front: parallel builds would each create their own
+  create-release:
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh release create "$GITHUB_REF_NAME" --draft --title "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
+    needs: create-release
+    # still run on manual dispatch, where create-release is skipped
+    if: ${{ !failure() && !cancelled() }}
     strategy:
       matrix:
         os: [macos-latest, windows-2022]

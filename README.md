@@ -7,6 +7,22 @@ It connects to a [Beybattle Pass BX-09](https://beyblade.fandom.com/wiki/Beybatt
 
 ![screenshot](external-assets/dizzi.png)
 
+## Download the desktop app
+
+The easiest way to use DiZZi is to grab the desktop app for macOS (Apple Silicon) or Windows from the [Releases page](https://github.com/syxanash/DiZZi/releases):
+
+- **macOS:** download the `.dmg`, open it and drag Dizzi into Applications
+- **Windows:** download the `.exe` and run the installer
+
+The desktop app always uses the prerecorded voice clips, so Ollama isn't needed.
+
+The app isn't code-signed, so your OS will warn you the first time you open it:
+
+- **macOS:** right-click Dizzi in Applications and choose **Open**, then confirm. If macOS says the app is damaged, run `xattr -cr /Applications/Dizzi.app` in the Terminal and try again. Allow Bluetooth access when asked.
+- **Windows:** when SmartScreen shows "Windows protected your PC", click **More info**, then **Run anyway**.
+
+To run DiZZi from source instead (needed for the AI features), follow the steps below.
+
 ## Requirements
 
 - Node 24 (version pinned in `.nvmrc`) and [nvm](https://github.com/nvm-sh/nvm)
@@ -72,6 +88,12 @@ npm run dev-start
 
 Then open [http://localhost:5173](http://localhost:5173).
 
+To run the desktop app from source (AI is always disabled there), run:
+
+```sh
+npm run electron
+```
+
 ## Resetting Scores
 
 If you click the tiny square button with the cross in it (beside the logo) you will wipe the entire Beybattle Pass internal database and start counting all scores from scratch.
@@ -86,7 +108,7 @@ The Node backend reads launch data from the Beybattle Pass over Bluetooth LE and
 
 ## Troubleshooting
 
-- **The Battlepass isn't found:** make sure Bluetooth is on, the Battlepass is awake and nearby, and (on macOS) your terminal has Bluetooth permission.
+- **The Battlepass isn't found:** make sure Bluetooth is on, the Battlepass is awake and nearby, and (on macOS) your terminal, or the Dizzi app, has Bluetooth permission in System Settings → Privacy & Security → Bluetooth.
 - **No AI comments:** check that `AI_ENABLED=true` is set, that Ollama is running, and that `gemma3:1b` has been pulled.
 - **Comments show up but there's no voice:** check that `phonon` has been pulled with `ollama pull phonon`.
 - **No voice with AI disabled:** check that the `.wav` clips are in `backend/public/audio`.
