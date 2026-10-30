@@ -1,33 +1,35 @@
 import express from 'express';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
+import { fileURLToPath } from 'node:url';
 import { startBluetooth, bleEvents, sendReset, getRecordings } from './scanner.js';
-import { askBrain, warmUpBrain, speak } from './llm.js';
 import { pickComment, AUDIO_DIR } from './comments.js';
 
-let deviceStatus = 'disconnected';
-
+const DIST = fileURLToPath(new URL('../dist', import.meta.url));
+const HOST = process.env.HOST || '0.0.0.0';
 const AI_ENABLED = process.env.AI_ENABLED === "true";
+
+const llm = AI_ENABLED ? await import('./llm.js') : null;
 
 const app = express();
 const server = createServer(app);
 
-app.use(express.json());
+let deviceStatus = 'disconnected';
 
-app.get('/', (_req, res) => {
-  res.json({ message: 'Express is ok' });
-});
+app.use(express.json());
 
 app.get('/api/config', (_req, res) => {
   res.json({ aiEnabled: AI_ENABLED });
 });
 
 app.post('/api/tts', async (req, res) => {
+  if (!AI_ENABLED) return res.status(404).json({ error: 'AI disabled' });
+
   const { text, voice } = req.body;
   if (!text) return res.status(400).json({ error: 'text is required' });
 
   try {
-    const wav = await speak(text, voice);
+    const wav = await llm.speak(text, voice);
     res.set('Content-Type', 'audio/wav');
     res.send(wav);
   } catch (err) {
@@ -54,6 +56,8 @@ app.post('/api/reset', async (req, res) => {
     res.status(503).json({ error: error.message });
   }
 });
+
+app.use(express.static(DIST));
 
 const wss = new WebSocketServer({ server });
 
@@ -87,7 +91,7 @@ bleEvents.on('recording', async (recording) => {
   }
 
   try {
-    const comment = await askBrain(recording);
+    const comment = await llm.askBrain(recording);
 
     broadcast({ type: 'comment', comment });
   } catch (err) {
@@ -97,21 +101,25 @@ bleEvents.on('recording', async (recording) => {
 
 const PORT = process.env.BACKEND_PORT || 4567;
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
-  startBluetooth();
+export const ready = new Promise((resolve) => {
+  server.listen(PORT, HOST, () => {
+    console.log(`Server running on http://${HOST}:${PORT}`);
+    startBluetooth();
 
-  if (process.env.AI_ENABLED === "true") {
-    console.log("Loading AI features...");
-    // load both models in the background so the first launch isn't slow
-    speak("hello")
-      .then(() => { console.log('Voice model ready'); })
-      .catch((err) => console.error('Voice model warm-up failed: ', err.message));
+    if (AI_ENABLED) {
+      console.log("Loading AI features...");
+      // load both models in the background so the first launch isn't slow
+      llm.speak("hello")
+        .then(() => { console.log('Voice model ready'); })
+        .catch((err) => console.error('Voice model warm-up failed: ', err.message));
 
-    warmUpBrain()
-      .then(() => console.log('LLM model ready'))
-      .catch((err) => console.error('LLM warm-up failed:', err.message));
-  } else {
-    console.log("AI features DISABLED, using prerecorded clips");
-  }
+      llm.warmUpBrain()
+        .then(() => console.log('LLM model ready'))
+        .catch((err) => console.error('LLM warm-up failed:', err.message));
+    } else {
+      console.log("AI features DISABLED, using prerecorded clips");
+    }
+
+    resolve();
+  });
 });

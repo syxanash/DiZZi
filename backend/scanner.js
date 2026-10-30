@@ -15,6 +15,7 @@ const HEADER_FLUSH_MS = 150; // lone a0 events (attach/drop)
 const BODY_FLUSH_MS = 1000;
 
 let writeCharacteristic = null;
+let currentPeripheral = null;
 let connecting = false;
 let expectingHistory = false;
 
@@ -48,6 +49,18 @@ export async function getRecordings() {
   }
 }
 
+// release the BLE link before quitting: noble's native macOS binding
+// deadlocks if it's still active when Electron tears down Node
+export async function stopBluetooth() {
+  noble.removeAllListeners();
+  // drop our disconnect handler so it doesn't restart scanning mid-shutdown
+  currentPeripheral?.removeAllListeners('disconnect');
+  await noble.stopScanningAsync().catch(() => { });
+  await currentPeripheral?.disconnectAsync().catch(() => { });
+  currentPeripheral = null;
+  writeCharacteristic = null;
+}
+
 export function startBluetooth() {
   let dataStream = [];
   let flushTimer = undefined;
@@ -55,6 +68,8 @@ export function startBluetooth() {
   function processPayload(payload) {
     try {
       const battlePass = battlepassDecoder(payload);
+      // lone headers the decoder can't classify (e.g. the 0x51 reply) aren't worth showing
+      if (battlePass.status === 'unknown') return;
       bleEvents.emit('recording', battlePass);
     } catch (err) {
       console.error('Decode failed:', err.message);
@@ -82,6 +97,7 @@ export function startBluetooth() {
     try {
       await noble.stopScanningAsync();
       await withTimeout(peripheral.connectAsync(), CONNECT_TIMEOUT_MS, 'connect');
+      currentPeripheral = peripheral;
 
       console.log(`Connected to ${peripheralName}, GATT map below:`);
 
@@ -89,6 +105,7 @@ export function startBluetooth() {
         console.log(`Bluetooth ${peripheralName} disconnected...`);
         bleEvents.emit('device', 'disconnected');
         writeCharacteristic = null;
+        currentPeripheral = null;
         connecting = false;
         expectingHistory = false;
         noble.startScanningAsync([], false);
@@ -151,9 +168,10 @@ export function startBluetooth() {
     } catch (err) {
       console.error(`BLE setup failed: ${err.message}, retrying...`);
       writeCharacteristic = null;
+      currentPeripheral = null;
       peripheral.removeAllListeners('disconnect');
       connecting = false;
-      peripheral.disconnectAsync().catch(() => {});
+      peripheral.disconnectAsync().catch(() => { });
       noble.startScanningAsync([], false);
     }
 

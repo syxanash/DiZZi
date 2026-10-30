@@ -1,8 +1,9 @@
 {
   "name": "dizzi2",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.2.0",
   "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "dev-start": "concurrently \"npm run dev\" \"npm run backend-start\"",
     "prod-start": "npm run build && concurrently \"npm run preview\" \"npm run backend-start\"",
@@ -10,11 +11,48 @@
     "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron": "npm run build && electron .",
+    "dist": "npm run build && electron-builder"
+  },
+  "build": {
+    "appId": "computer.simone.dizzi",
+    "productName": "Dizzi",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**",
+      "backend/**",
+      "electron/**",
+      "!backend/llm.js",
+      "!node_modules/ollama/**",
+      "!node_modules/openai/**"
+    ],
+    "asarUnpack": [
+      "backend/public/audio/**"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "syxanash",
+      "repo": "dizzi"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "identity": null,
+      "extendInfo": {
+        "NSBluetoothAlwaysUsageDescription": "Dizzi connects to your Beyblade launcher."
+      }
+    },
+    "win": {
+      "target": "nsis"
+    }
   },
   "dependencies": {
     "@abandonware/noble": "^1.9.2-26",
-    "concurrently": "^10.0.5",
     "express": "^5.2.1",
     "lodash": "^4.18.1",
     "ollama": "^0.6.4",
@@ -32,6 +70,9 @@
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
     "babel-plugin-react-compiler": "^1.0.0",
+    "concurrently": "^10.0.6",
+    "electron": "^45.1.0",
+    "electron-builder": "^26.18.0",
     "eslint": "^10.9.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.4",
