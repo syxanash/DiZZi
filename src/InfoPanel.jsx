@@ -21,8 +21,9 @@ function useColumns(ref, probeRef, maxCols) {
 
   useEffect(() => {
     const el = ref.current;
+    const probe = probeRef.current;
     const ro = new ResizeObserver(([entry]) => {
-      const charWidth = probeRef.current.getBoundingClientRect().width || 1;
+      const charWidth = probe.getBoundingClientRect().width || 1;
       setCols(Math.max(1, Math.min(maxCols, Math.floor(entry.contentRect.width / charWidth))));
     });
     ro.observe(el);
