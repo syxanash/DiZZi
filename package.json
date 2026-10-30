@@ -13,7 +13,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "electron": "npm run build && electron .",
-    "dist": "npm run build && electron-builder"
+    "dist": "npm run build && electron-builder",
+    "pack:mac": "npm run build && electron-builder --mac --dir",
+    "dist:mac": "npm run build && electron-builder --mac"
   },
   "build": {
     "appId": "computer.simone.dizzi",
