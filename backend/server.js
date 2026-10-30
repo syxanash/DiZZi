@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { startBluetooth, bleEvents, sendReset, getRecordings } from './scanner.js';
 import { askBrain, warmUpBrain, speak } from './llm.js';
+import { pickComment, AUDIO_DIR } from './comments.js';
 
 let deviceStatus = 'disconnected';
 
@@ -33,6 +34,8 @@ app.post('/api/tts', async (req, res) => {
     res.status(502).json({ error: err.message });
   }
 });
+
+app.use('/api/audio', express.static(AUDIO_DIR));
 
 app.post('/api/recordings', async (req, res) => {
   try {
@@ -75,14 +78,20 @@ bleEvents.on('device', (device) => {
 bleEvents.on('recording', async (recording) => {
   broadcast({ type: 'recording', recording });
 
-  if (recording.status === 'launched' && AI_ENABLED) {
-    try {
-      const comment = await askBrain(recording);
+  if (recording.status !== 'launched') return;
 
-      broadcast({ type: 'comment', comment });
-    } catch (err) {
-      console.error('LLM comment failed:', err.message);
-    }
+  // without AI we skip ollama entirely and pick a prerecorded clip
+  if (!AI_ENABLED) {
+    broadcast({ type: 'comment', comment: pickComment(recording) });
+    return;
+  }
+
+  try {
+    const comment = await askBrain(recording);
+
+    broadcast({ type: 'comment', comment });
+  } catch (err) {
+    console.error('LLM comment failed:', err.message);
   }
 });
 
@@ -103,6 +112,6 @@ server.listen(PORT, '0.0.0.0', () => {
       .then(() => console.log('LLM model ready'))
       .catch((err) => console.error('LLM warm-up failed:', err.message));
   } else {
-    console.log("AI features DISABLED");
+    console.log("AI features DISABLED, using prerecorded clips");
   }
 });

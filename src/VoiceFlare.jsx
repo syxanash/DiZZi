@@ -98,7 +98,15 @@ function VoiceFlare({ ref }) {
 
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
+    play(url, () => URL.revokeObjectURL(url));
+  }
+
+  function playClip(name) {
+    play(`/api/audio/${name}.wav`);
+  }
+
+  function play(src, onEnded) {
+    const audio = new Audio(src);
 
     const audioCtx = new AudioContext();
     const source = audioCtx.createMediaElementSource(audio);
@@ -145,7 +153,7 @@ function VoiceFlare({ ref }) {
     audio.play();
     requestAnimationFrame(tick);
     audio.onended = () => {
-      URL.revokeObjectURL(url);
+      onEnded?.();
       flareRef.current.style.setProperty('--level', 0);
       innerFlareRef.current.style.setProperty('--level', 0);
       innerFlareRef.current.classList.remove('speaking');
@@ -156,7 +164,7 @@ function VoiceFlare({ ref }) {
     };
   }
 
-  useImperativeHandle(ref, () => ({ playTTS }));
+  useImperativeHandle(ref, () => ({ playTTS, playClip }));
 
   return <div>
     <div className="flare" ref={flareRef} />

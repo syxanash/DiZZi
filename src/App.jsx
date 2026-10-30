@@ -50,29 +50,34 @@ function App() {
   const [requested, setRequested] = useState(false);
 
   const voiceRef = useRef(null);
+
+  // with AI we generate the line via TTS, otherwise we play the prerecorded clip
+  const say = (text, clip) => {
+    if (aiEnabled) {
+      voiceRef.current?.playTTS(text);
+    } else {
+      voiceRef.current?.playClip(clip);
+    }
+  };
+
   const { wsStatus, device, recording, clearRecording } = useBleSocket({
     onRecording: (rec) => {
       if (rec.battery != null && (rec.status === 'history' || rec.status === 'attached')) {
         setBattery(Math.floor(rec.battery));
       }
 
-      if (!aiEnabled) { return; }
-
       if (rec.status === 'attached') {
-        voiceRef.current?.playTTS(sample(['3, 2, 1, go shoot!!!', 'Let it rip!!!']));
+        say(...sample([['3, 2, 1, go shoot!!!', 'shoot1'], ['Let it rip!!!', 'shoot2']]));
       } else if (rec.status === 'dropped') {
-        voiceRef.current?.playTTS('Did you just drop your beyblade?');
+        say('Did you just drop your beyblade?', 'drop');
       } else if (rec.status === 'reset') {
-        voiceRef.current?.playTTS('Reset successful!');
+        say('Reset successful!', 'reset');
       } else if (rec.status === 'history') {
-        voiceRef.current?.playTTS('LP data loaded successfully!');
+        say('LP data loaded successfully!', 'load');
       }
     },
-    onComment: (comment) => {
-      if (!aiEnabled) { return; }
-
-      voiceRef.current?.playTTS(comment);
-    },
+    // the backend sends a sentence when AI is on, or a clip name when it's off
+    onComment: (comment) => say(comment, comment),
   });
 
   useEffect(() => {
