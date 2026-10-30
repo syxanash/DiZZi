@@ -15,7 +15,8 @@
     "electron": "npm run build && electron .",
     "dist": "npm run build && electron-builder",
     "pack:mac": "npm run build && electron-builder --mac --dir",
-    "dist:mac": "npm run build && electron-builder --mac"
+    "dist:mac": "npm run build && electron-builder --mac",
+    "release": "npm version patch && git push --follow-tags"
   },
   "build": {
     "appId": "computer.simone.dizzi",
