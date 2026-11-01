@@ -80,7 +80,7 @@ export function startBluetooth() {
   noble.on('stateChange', state => {
     console.log('Bluetooth state:', state);
     if (state === 'poweredOn') {
-      noble.startScanning([], false);
+      noble.startScanning([], true);
     }
   });
 
@@ -108,7 +108,7 @@ export function startBluetooth() {
         currentPeripheral = null;
         connecting = false;
         expectingHistory = false;
-        noble.startScanningAsync([], false);
+        noble.startScanningAsync([], true);
       });
 
       const services = await withTimeout(peripheral.discoverServicesAsync([]), CONNECT_TIMEOUT_MS, 'discover services');
@@ -172,7 +172,7 @@ export function startBluetooth() {
       peripheral.removeAllListeners('disconnect');
       connecting = false;
       peripheral.disconnectAsync().catch(() => { });
-      noble.startScanningAsync([], false);
+      noble.startScanningAsync([], true);
     }
 
     // console.log('\n==========================================\n');
