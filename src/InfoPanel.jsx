@@ -239,7 +239,7 @@ export default function InfoPanel({ recording, requested, onClose }) {
           <span
             className="terminal-btn terminal-btn--close"
             aria-label="Disconnect"
-            onClick={() => onClose().catch(console.error)}>✕</span>
+            onClick={onClose}>✕</span>
         </div>
         <div className="terminal">
           {recording && loaderDone

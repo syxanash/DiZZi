@@ -1,0 +1,47 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+}
+
+.modal {
+  background: #000;
+  border: 2px solid #333;
+  border-radius: 12px;
+  padding: 20px 28px;
+  color: rgb(255, 231, 51);
+  font-family: "VT323", "Share Tech Mono", ui-monospace, monospace;
+  font-size: 40px;
+  text-align: center;
+  box-shadow: inset 0 0 30px rgba(51, 255, 102, 0.12);
+}
+
+.modal p {
+  margin: 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.modal-actions button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 1px solid currentColor;
+  padding: 2px 16px;
+  cursor: pointer;
+}
+
+.modal-actions button:hover,
+.modal-actions button:focus-visible {
+  background: rgb(255, 231, 51);
+  color: #000;
+  outline: none;
+}

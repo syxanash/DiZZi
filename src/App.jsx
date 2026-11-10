@@ -5,6 +5,7 @@ import { useBleSocket } from './useBleSocket';
 import Beyblade from './Beyblade';
 import InfoPanel from './InfoPanel';
 import VoiceFlare from './VoiceFlare';
+import ConfirmModal from './ConfirmModal';
 
 const IDLE_AFTER_MS = {
   dropped: 10000,
@@ -48,6 +49,9 @@ function App() {
   const [aiEnabled, setAiEnabled] = useState(false);
   const [battery, setBattery] = useState(undefined);
   const [requested, setRequested] = useState(false);
+  const [confirm, setConfirm] = useState(null);
+
+  const ask = (message, action) => setConfirm({ message, action });
 
   const voiceRef = useRef(null);
 
@@ -142,7 +146,7 @@ function App() {
           </div>
 
           {/* little crosshair glyph */}
-          <div className="crosshair" aria-hidden="true" onClick={sendResetRequest}>
+          <div className="crosshair" aria-hidden="true" onClick={() => ask('Reset internal launch records?', sendResetRequest)}>
             <span></span><span></span>
           </div>
 
@@ -169,10 +173,25 @@ function App() {
             <div className="beyblade-side">
               <Beyblade status={beyStatus} />
             </div>
-            <InfoPanel recording={recording} requested={requested} onClose={sendDisconnect} />
+            <InfoPanel
+              recording={recording}
+              requested={requested && device === 'connected'}
+              onClose={() => ask('Disconnect device?', sendDisconnect)}
+            />
           </div>
         </div>
       </div>
+
+      {confirm && (
+        <ConfirmModal
+          message={confirm.message}
+          onNo={() => setConfirm(null)}
+          onYes={() => {
+            setConfirm(null);
+            confirm.action().catch(console.error);
+          }}
+        />
+      )}
     </>
   );
 }
