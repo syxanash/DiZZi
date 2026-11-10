@@ -61,6 +61,11 @@ export async function stopBluetooth() {
   writeCharacteristic = null;
 }
 
+export async function disconnectDevice() {
+  if (!currentPeripheral) throw new Error('Beybattle Pass not connected');
+  await currentPeripheral.disconnectAsync();
+}
+
 export function startBluetooth() {
   let dataStream = [];
   let flushTimer = undefined;

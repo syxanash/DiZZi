@@ -225,7 +225,7 @@ function LoaderScreen({ started, loaded, onDone }) {
   </div>;
 }
 
-export default function InfoPanel({ recording, requested }) {
+export default function InfoPanel({ recording, requested, onClose }) {
   const [loaderDone, setLoaderDone] = useState(false);
 
   if (!recording && loaderDone) setLoaderDone(false);
@@ -233,10 +233,13 @@ export default function InfoPanel({ recording, requested }) {
   return (
     <div className="info-panel">
       <div className="terminal-window">
-        <div className="terminal-titlebar" aria-hidden="true">
+        <div className="terminal-titlebar">
           <span className="terminal-btn">_</span>
           <span className="terminal-btn">□</span>
-          <span className="terminal-btn">✕</span>
+          <span
+            className="terminal-btn terminal-btn--close"
+            aria-label="Disconnect"
+            onClick={() => onClose().catch(console.error)}>✕</span>
         </div>
         <div className="terminal">
           {recording && loaderDone

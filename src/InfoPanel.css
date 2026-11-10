@@ -37,6 +37,18 @@
   user-select: none;
 }
 
+.terminal-btn--close:hover {
+  background: #980000;
+}
+
+.terminal-btn--close:active {
+  transform: translate(0, 2px);
+}
+
+.terminal-btn--close {
+  cursor: pointer;
+}
+
 .terminal {
   position: relative;
   flex: 1;
@@ -206,6 +218,7 @@
     display: none;
   }
 }
+
 .stats-row {
   display: flex;
   flex-wrap: wrap;

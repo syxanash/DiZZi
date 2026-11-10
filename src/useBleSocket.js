@@ -32,6 +32,7 @@ export function useBleSocket({ url = `ws://${location.host}/ws`, onRecording, on
         const msg = JSON.parse(e.data);
         if (msg.type === 'device') {
           setDevice(msg.device);
+          if (msg.device !== 'connected') setRecording(null);
         } else if (msg.type === 'recording') {
           setRecording(msg.recording);
           notifyRecording(msg.recording);

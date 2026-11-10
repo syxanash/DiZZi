@@ -60,6 +60,13 @@ function App() {
     }
   };
 
+  async function sendDisconnect() {
+    const res = await fetch('/api/disconnect', { method: 'POST' });
+    if (!res.ok) throw new Error((await res.json()).error);
+    setBattery(undefined);
+    setExpiredRecording(null);
+  }
+
   const { wsStatus, device, recording, clearRecording } = useBleSocket({
     onRecording: (rec) => {
       if (rec.battery != null && (rec.status === 'history' || rec.status === 'attached')) {
@@ -162,7 +169,7 @@ function App() {
             <div className="beyblade-side">
               <Beyblade status={beyStatus} />
             </div>
-            <InfoPanel recording={recording} requested={requested} />
+            <InfoPanel recording={recording} requested={requested} onClose={sendDisconnect} />
           </div>
         </div>
       </div>

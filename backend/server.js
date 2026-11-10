@@ -2,7 +2,7 @@ import express from 'express';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'node:url';
-import { startBluetooth, bleEvents, sendReset, getRecordings } from './scanner.js';
+import { startBluetooth, bleEvents, sendReset, getRecordings, disconnectDevice } from './scanner.js';
 import { pickComment, AUDIO_DIR } from './comments.js';
 
 const DIST = fileURLToPath(new URL('../dist', import.meta.url));
@@ -52,6 +52,15 @@ app.post('/api/reset', async (req, res) => {
   try {
     await sendReset();
     res.json({ message: 'RESET OK!' });
+  } catch (error) {
+    res.status(503).json({ error: error.message });
+  }
+});
+
+app.post('/api/disconnect', async (req, res) => {
+  try {
+    await disconnectDevice();
+    res.json({ message: 'DISCONNECTED' });
   } catch (error) {
     res.status(503).json({ error: error.message });
   }
