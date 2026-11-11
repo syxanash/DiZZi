@@ -1,0 +1,28 @@
+.actions-modal {
+  flex: none;
+  width: min(520px, calc(100vw - 32px));
+}
+
+.actions-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: rgb(255, 231, 51);
+}
+
+.actions-modal__body button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 1px solid currentColor;
+  padding: 4px 16px;
+  cursor: pointer;
+  text-shadow: inherit;
+}
+
+.actions-modal__body button:hover,
+.actions-modal__body button:focus-visible {
+  background: rgb(255, 231, 51);
+  color: #000;
+  outline: none;
+}

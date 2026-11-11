@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'node:url';
 import { startBluetooth, bleEvents, sendReset, getRecordings, disconnectDevice } from './scanner.js';
-import { pickComment, AUDIO_DIR } from './comments.js';
+import { pickComment, AUDIO_DIR, GOOD_LAUNCH_RPM } from './comments.js';
 
 const DIST = fileURLToPath(new URL('../dist', import.meta.url));
 const HOST = process.env.HOST || '0.0.0.0';
@@ -19,7 +19,7 @@ let deviceStatus = 'disconnected';
 app.use(express.json());
 
 app.get('/api/config', (_req, res) => {
-  res.json({ aiEnabled: AI_ENABLED });
+  res.json({ aiEnabled: AI_ENABLED, goodLaunchRpm: GOOD_LAUNCH_RPM });
 });
 
 app.post('/api/tts', async (req, res) => {

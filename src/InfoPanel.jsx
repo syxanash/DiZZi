@@ -234,8 +234,6 @@ export default function InfoPanel({ recording, requested, onClose }) {
     <div className="info-panel">
       <div className="terminal-window">
         <div className="terminal-titlebar">
-          <span className="terminal-btn">_</span>
-          <span className="terminal-btn">□</span>
           <span
             className="terminal-btn terminal-btn--close"
             aria-label="Disconnect"

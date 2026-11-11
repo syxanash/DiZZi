@@ -8,6 +8,7 @@ app.whenReady().then(async () => {
   process.env.AI_ENABLED = 'false';
   process.env.HOST = '127.0.0.1';
   process.env.BACKEND_PORT ??= '4567';
+  process.env.GOOD_LAUNCH_RPM = '9800';
 
   const { ready } = await import('../backend/server.js');
   await ready;

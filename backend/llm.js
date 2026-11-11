@@ -1,5 +1,6 @@
 import ollama from 'ollama';
 import OpenAI from 'openai';
+import { GOOD_LAUNCH_RPM } from './comments.js';
 
 const SPEECH_MODEL = 'phonon';
 const SPEECH_VOICE = 'Juniper';
@@ -8,13 +9,15 @@ const openai = new OpenAI({ baseURL: 'http://localhost:11434/v1', apiKey: 'ollam
 
 const MODEL = 'gemma3:1b';
 
+const WEAK_RPM = Math.round(GOOD_LAUNCH_RPM / 2);
+
 const SYSTEM_PROMPT = `You are a sarcastic artificial intelligence and Beyblade battle commentator.
 A Beyblade is a spinning top launched with a ripcord. Launch power is measured in RPM (rotations per minute).
 You can roast the player by judging the result or be also be kind to him when the launch power is actually good.
-Higher RPM is better: under 3000 is weak, 3000-7000 is alright, over 7000 is excellent.
+Higher RPM is better: under ${WEAK_RPM} is weak, ${WEAK_RPM}-${GOOD_LAUNCH_RPM} is alright, over ${GOOD_LAUNCH_RPM} is excellent.
 Reply with ONE short sentence (max 15 words) about how the player's launches are going.
 
-Example: "Huge jump to 8200 RPM, that's a monster launch!"
+Example: "Huge jump to ${GOOD_LAUNCH_RPM} RPM, that's a monster launch!"
 Example: "Dropped to 2500 RPM, pull that ripcord harder!"`;
 
 export async function speak(text, voice = SPEECH_VOICE) {
@@ -49,7 +52,7 @@ export async function warmUpBrain() {
     model: MODEL,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: describeLaunches([5000]) },
+      { role: 'user', content: describeLaunches([WEAK_RPM]) },
     ],
     keep_alive: -1,
     options: { num_predict: 1 },

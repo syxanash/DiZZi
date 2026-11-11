@@ -4,8 +4,8 @@ import _ from 'lodash';
 
 export const AUDIO_DIR = fileURLToPath(new URL('./public/audio', import.meta.url));
 
-// same threshold the frontend uses for spin_slow / spin_fast
-const GOOD_LAUNCH_RPM = 5000;
+// single source of truth, the frontend gets it from /api/config
+export const GOOD_LAUNCH_RPM = Number(process.env.GOOD_LAUNCH_RPM) || 9500;
 
 const clips = readdirSync(AUDIO_DIR).map((file) => file.replace(/\.wav$/, ''));
 const praises = clips.filter((name) => name.startsWith('praise_'));

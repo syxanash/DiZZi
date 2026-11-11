@@ -6,6 +6,7 @@ import Beyblade from './Beyblade';
 import InfoPanel from './InfoPanel';
 import VoiceFlare from './VoiceFlare';
 import ConfirmModal from './ConfirmModal';
+import ActionsModal from './ActionsModal';
 
 const IDLE_AFTER_MS = {
   dropped: 10000,
@@ -25,11 +26,11 @@ async function requestRecordings() {
   return false;
 }
 
-function getBeyStatus(recording, wsStatus, device, isExpired) {
+function getBeyStatus(recording, wsStatus, device, isExpired, goodLaunchRpm) {
   if (wsStatus !== 'open' || device !== 'connected') return 'disconnected';
   if (!recording || recording.status === 'reset' || isExpired) return 'idle';
   if (recording.status === 'launched') {
-    return recording.launchesValues.at(-1) < 5000 ? 'spin_slow' : 'spin_fast';
+    return recording.launchesValues.at(-1) >= goodLaunchRpm ? 'spin_fast' : 'spin_slow';
   }
   return recording.status;
 }
@@ -47,9 +48,11 @@ const toggleFullSceen = () => {
 function App() {
   const [expiredRecording, setExpiredRecording] = useState(null);
   const [aiEnabled, setAiEnabled] = useState(false);
+  const [goodLaunchRpm, setGoodLaunchRpm] = useState(null);
   const [battery, setBattery] = useState(undefined);
   const [requested, setRequested] = useState(false);
   const [confirm, setConfirm] = useState(null);
+  const [actionsOpen, setActionsOpen] = useState(false);
 
   const ask = (message, action) => setConfirm({ message, action });
 
@@ -94,7 +97,10 @@ function App() {
   useEffect(() => {
     fetch('/api/config')
       .then((r) => r.json())
-      .then((cfg) => setAiEnabled(cfg.aiEnabled));
+      .then((cfg) => {
+        setAiEnabled(cfg.aiEnabled);
+        setGoodLaunchRpm(cfg.goodLaunchRpm);
+      });
   }, []);
 
   useEffect(() => {
@@ -113,7 +119,7 @@ function App() {
     return () => clearTimeout(idleTimeout);
   }, [recording]);
 
-  const beyStatus = getBeyStatus(recording, wsStatus, device, expiredRecording === recording);
+  const beyStatus = getBeyStatus(recording, wsStatus, device, expiredRecording === recording, goodLaunchRpm);
 
   async function sendResetRequest() {
     const res = await fetch('/api/reset', { method: 'POST' });
@@ -146,7 +152,7 @@ function App() {
           </div>
 
           {/* little crosshair glyph */}
-          <div className="crosshair" aria-hidden="true" onClick={() => ask('Reset internal launch records?', sendResetRequest)}>
+          <div className="crosshair" style={{ display: beyStatus === 'disconnected' ? 'none' : 'block' }} aria-label="Options" onClick={() => setActionsOpen(true)}>
             <span></span><span></span>
           </div>
 
@@ -181,6 +187,20 @@ function App() {
           </div>
         </div>
       </div>
+
+      {actionsOpen && (
+        <ActionsModal
+          onClose={() => setActionsOpen(false)}
+          onReset={() => {
+            setActionsOpen(false);
+            ask('Reset internal launch records?', sendResetRequest);
+          }}
+          onDisconnect={() => {
+            setActionsOpen(false);
+            ask('Disconnect device?', sendDisconnect);
+          }}
+        />
+      )}
 
       {confirm && (
         <ConfirmModal
