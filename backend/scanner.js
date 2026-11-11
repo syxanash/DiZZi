@@ -11,7 +11,7 @@ const writeChar = '55c4f001f8eb11ecb9390242ac120002';
 const CONNECT_TIMEOUT_MS = 10000;
 const READ_TIMEOUT_MS = 3000;
 
-const HEADER_FLUSH_MS = 150; // lone a0 events (attach/drop)
+const HEADER_FLUSH_MS = 150;
 const BODY_FLUSH_MS = 1000;
 
 const MAX_DEVICES = 2;
@@ -99,7 +99,7 @@ export function startBluetooth() {
       const battlePass = battlepassDecoder(payload, d.decoderCtx);
       // lone headers the decoder can't classify (e.g. the 0x51 reply) aren't worth showing
       if (battlePass.status === 'unknown') return;
-      bleEvents.emit('recording', battlePass);
+      bleEvents.emit('recording', { ...battlePass, deviceId: d.id, slot: d.slot });
     } catch (err) {
       console.error('Decode failed:', err.message);
       console.error(payload.map((p) => p.toString('hex')));
@@ -134,7 +134,7 @@ export function startBluetooth() {
 
       peripheral.once('disconnect', () => {
         console.log(`Bluetooth ${peripheralName} disconnected...`);
-        bleEvents.emit('device', 'disconnected');
+        bleEvents.emit('device', { id: device.id, slot: device.slot, device: 'disconnected' });
         clearTimeout(device.flushTimer);
         devices.delete(device.id);
         noble.startScanningAsync([], true);
@@ -196,7 +196,7 @@ export function startBluetooth() {
       connecting = false;
       if (devices.size < MAX_DEVICES) noble.startScanningAsync([], true);
 
-      bleEvents.emit('device', 'connected');
+      bleEvents.emit('device', { id: device.id, slot: device.slot, device: 'connected' });
     } catch (err) {
       console.error(`BLE setup failed: ${err.message}, retrying...`);
       devices.delete(device.id);
