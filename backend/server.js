@@ -14,7 +14,7 @@ const llm = AI_ENABLED ? await import('./llm.js') : null;
 const app = express();
 const server = createServer(app);
 
-let deviceStatus = 'disconnected';
+const devices = new Map();
 
 app.use(express.json());
 
@@ -41,7 +41,7 @@ app.use('/api/audio', express.static(AUDIO_DIR));
 
 app.post('/api/recordings', async (req, res) => {
   try {
-    await getRecordings();
+    await getRecordings(req.body?.deviceId);
     res.json({ message: 'REQ SENT!' });
   } catch (error) {
     res.status(503).json({ error: error.message });
@@ -50,7 +50,7 @@ app.post('/api/recordings', async (req, res) => {
 
 app.post('/api/reset', async (req, res) => {
   try {
-    await sendReset();
+    await sendReset(req.body?.deviceId);
     res.json({ message: 'RESET OK!' });
   } catch (error) {
     res.status(503).json({ error: error.message });
@@ -59,7 +59,7 @@ app.post('/api/reset', async (req, res) => {
 
 app.post('/api/disconnect', async (req, res) => {
   try {
-    await disconnectDevice();
+    await disconnectDevice(req.body?.deviceId);
     res.json({ message: 'DISCONNECTED' });
   } catch (error) {
     res.status(503).json({ error: error.message });
@@ -79,13 +79,17 @@ function broadcast(obj) {
 
 wss.on('connection', (socket) => {
   console.log('client connected total: ', wss.clients.size);
-  socket.send(JSON.stringify({ type: 'device', device: deviceStatus }));
+  if (devices.size === 0) socket.send(JSON.stringify({ type: 'device', device: 'disconnected' }));
+  for (const d of devices.values()) {
+    socket.send(JSON.stringify({ type: 'device', ...d }));
+  }
   socket.on('close', () => console.log('client left, total: ', wss.clients.size));
 });
 
-bleEvents.on('device', (device) => {
-  deviceStatus = device;
-  broadcast({ type: 'device', device });
+bleEvents.on('device', (evt) => {
+  if (evt.device === 'connected') devices.set(evt.id, evt);
+  else devices.delete(evt.id);
+  broadcast({ type: 'device', ...evt });
 });
 
 bleEvents.on('recording', async (recording) => {

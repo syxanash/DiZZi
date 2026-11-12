@@ -6,10 +6,9 @@ const ENTRIES_SUM_BYTEPOS = 11;
 const CHECKSUM_BYTEPOS = 16;
 const BATTERY_BYTEPOS = 4;
 
-let globalCounter = undefined;
 const RESET_ACK_PAGE = 0xa1;
 
-export function battlepassDecoder(payload) {
+export function battlepassDecoder(payload, ctx = {}) {
   console.log(payload);
 
   const battlepass = {
@@ -23,7 +22,7 @@ export function battlepassDecoder(payload) {
   const isReset = payload.some((page) => page[PAGE_BYTEPOS] === RESET_ACK_PAGE);
 
   if (isReset) {
-    globalCounter = undefined;
+    ctx.globalCounter = undefined;
     battlepass.status = "reset";
     battlepass.lifetimeCounter = 0;
     return battlepass;
@@ -42,13 +41,13 @@ export function battlepassDecoder(payload) {
       const batteryValue = (header[BATTERY_BYTEPOS] * 100) / 255;
 
       if (status === '4') {
-        globalCounter = launchesCounter;
+        ctx.globalCounter = launchesCounter;
 
         battlepass.status = "attached";
         battlepass.lifetimeCounter = launchesCounter;
         battlepass.highScore = highScore;
         battlepass.battery = batteryValue;
-      } else if (status === '0' && launchesCounter <= globalCounter) {
+      } else if (status === '0' && launchesCounter <= ctx.globalCounter) {
         battlepass.status = "dropped";
         battlepass.lifetimeCounter = launchesCounter;
         battlepass.highScore = highScore;
