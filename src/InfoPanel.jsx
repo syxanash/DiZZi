@@ -232,7 +232,7 @@ export default function InfoPanel({ recording, requested, waitingText, onClose, 
   if (!recording && loaderDone) setLoaderDone(false);
 
   return (
-    <div className="info-panel">
+    <div className="info-panel" style={{ padding: competitive ? 0 : '24px' }}>
       <div className="terminal-window">
         <div className="terminal-titlebar">
           <span

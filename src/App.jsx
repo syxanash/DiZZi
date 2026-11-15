@@ -157,6 +157,17 @@ function App() {
 
   const beyStatus = getBeyStatus(recording, wsStatus, device, expiredRecording === recording, goodLaunchRpm);
 
+  // switching mode starts from a clean slate: drop every connected Battle Pass
+  async function switchMode() {
+    const connected = Object.values(devices).filter((d) => d.status === 'connected');
+    // one at a time: noble is happier with sequential BLE operations
+    for (const d of connected) {
+      await sendDisconnect(d.id).catch(console.error);
+    }
+    setCompetitive((c) => !c);
+    setRound({});
+  }
+
   async function sendResetRequest() {
     const res = await fetch('/api/reset', { method: 'POST' });
     const data = await res.json();
@@ -247,7 +258,11 @@ function App() {
         <ActionsModal
           canManageDevice={connectedCount === 1}
           competitive={competitive}
-          onToggleCompetitive={() => { setCompetitive((c) => !c); setRound({}); }}
+          onToggleCompetitive={() => {
+            if (connectedCount === 0) return switchMode();
+            setActionsOpen(false);
+            ask('Switching mode will disconnect all devices. Continue?', switchMode);
+          }}
           onClose={() => setActionsOpen(false)}
           onReset={() => {
             setActionsOpen(false);
