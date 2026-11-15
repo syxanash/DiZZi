@@ -63,12 +63,14 @@ Create a `.env` file in the project root (`.env.local` is also loaded, for local
 ```
 AI_ENABLED=true
 BACKEND_PORT=4567
+GOOD_LAUNCH_RPM=9800
 ```
 
 | Variable       | Default | Description                                                                 |
 |----------------|---------|-----------------------------------------------------------------------------|
 | `AI_ENABLED`   | `false` | `true`: Gemma 3 launch comments read by Phonon. `false`: prerecorded clips, no Ollama needed |
 | `BACKEND_PORT` | `4567`  | Port of the backend server; the frontend proxies `/api` and `/ws` to it    |
+| `GOOD_LAUNCH_RPM` | `9800` | The RPM threshold that DiZZi considers good enough to praise your score! |
 
 ## Usage
 
