@@ -1,14 +1,36 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './ConfirmModal.css';
 import './InfoPanel.css';
 import './ActionsModal.css';
 
-export default function ActionsModal({ onReset, onDisconnect, onClose }) {
+export default function ActionsModal({ competitive, canManageDevice, onToggleCompetitive, onReset, onDisconnect, onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    function onFullscreenChange() {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    }
+
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  }, []);
+
+  const toggleFullSceen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -25,8 +47,16 @@ export default function ActionsModal({ onReset, onDisconnect, onClose }) {
             onClick={onClose}>✕</span>
         </div>
         <div className="terminal actions-modal__body">
-          <button type="button" onClick={onReset}>CLEAR LAUNCH RECORDS</button>
-          <button type="button" onClick={onDisconnect}>DISCONNECT DEVICE</button>
+          <button type="button" onClick={toggleFullSceen}>
+            TOGGLE FULLSCREEN: {isFullscreen ? 'OFF' : 'ON'}
+          </button>
+          <button type="button" onClick={onToggleCompetitive}>
+            COMPETITIVE MODE: {competitive ? 'ON' : 'OFF'}
+          </button>
+          {canManageDevice && <>
+            <button type="button" onClick={onReset}>CLEAR LAUNCH RECORDS</button>
+            <button type="button" onClick={onDisconnect}>DISCONNECT DEVICE</button>
+          </>}
         </div>
       </div>
     </div>

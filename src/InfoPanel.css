@@ -2,7 +2,6 @@
   flex: 1 1 60%;
   min-width: 0;
   display: flex;
-  padding: 24px;
 }
 
 .terminal-window {
@@ -227,5 +226,12 @@
 }
 
 .stats-row p {
+  white-space: nowrap;
+}
+
+.player-header {
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  color: rgb(51, 221, 255);
   white-space: nowrap;
 }

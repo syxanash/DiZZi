@@ -148,7 +148,7 @@ function HistoricalData({ levels, values }) {
   );
 }
 
-function renderTerminalText(recording) {
+function renderTerminalText(recording, competitive) {
   function isNewHighScore({ launchesValues, highScore }) {
     const last = launchesValues.at(-1);
     const previousBest = Math.max(0, ...launchesValues.slice(0, -1));
@@ -183,7 +183,7 @@ function renderTerminalText(recording) {
         <p>Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
         <p>Average: <span style={{ color: 'rgb(51, 221, 255)' }}>{average}</span></p>
       </div>
-      {newHighScore && <AsciiConfetti key={recording.lifetimeCounter} />}
+      {newHighScore && !competitive && <AsciiConfetti key={recording.lifetimeCounter} />}
     </>;
   } else if (recording.status === 'attached') {
     return <div className='centered-text'>
@@ -225,13 +225,14 @@ function LoaderScreen({ started, loaded, onDone }) {
   </div>;
 }
 
-export default function InfoPanel({ recording, requested, onClose }) {
+export default function InfoPanel({ recording, requested, waitingText, onClose, result, player }) {
+  const competitive = player != null;
   const [loaderDone, setLoaderDone] = useState(false);
 
   if (!recording && loaderDone) setLoaderDone(false);
 
   return (
-    <div className="info-panel">
+    <div className="info-panel" style={{ padding: competitive ? 0 : '24px' }}>
       <div className="terminal-window">
         <div className="terminal-titlebar">
           <span
@@ -240,9 +241,20 @@ export default function InfoPanel({ recording, requested, onClose }) {
             onClick={onClose}>✕</span>
         </div>
         <div className="terminal">
-          {recording && loaderDone
-            ? renderTerminalText(recording)
-            : <LoaderScreen started={requested} loaded={!!recording} onDone={() => setLoaderDone(true)} />
+          {competitive && (
+            <p className="player-header">
+              PLAYER {player}
+              {result === 'win' && <span style={{ color: 'rgb(51, 255, 75)' }}> 🏆 WINNER!</span>}
+              {result === 'draw' && <span style={{ color: 'rgb(255, 231, 51)' }}> DRAW!</span>}
+            </p>
+          )}
+          {result === 'win' && <AsciiConfetti key={recording?.lifetimeCounter} />}
+          {
+            waitingText
+              ? <div className="centered-text"><p>{waitingText} <span className="terminal-cursor">▒</span></p></div>
+              : recording && loaderDone
+                ? renderTerminalText(recording, competitive)
+                : <LoaderScreen started={requested} loaded={!!recording} onDone={() => setLoaderDone(true)} />
           }
         </div>
       </div>
