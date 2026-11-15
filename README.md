@@ -94,11 +94,22 @@ To run the desktop app from source (AI is always disabled there), run:
 npm run electron
 ```
 
-## Resetting Scores
+## Settings
 
-If you click the tiny square button with the cross in it (beside the logo) you will wipe the entire Beybattle Pass internal database and start counting all scores from scratch.
+Click the small square button with a cross inside (next to the logo) to access the following settings:
 
-![reset](external-assets/reset.png)
+- Reset all scores in the Beybattle Pass (⚠️ This will erase all your launch data!)
+- Disconnect the Beybattle Pass from the app
+- Toggle fullscreen mode
+- Enter Competitive Mode
+
+![settings](external-assets/reset.png)
+
+## Competitive Mode
+
+By selecting Competitive Mode, you can connect two Beybattle Pass devices simultaneously. The app will then display which player has the higher score after both players launch the beys:
+
+![competitive](external-assets/competitive.png)
 
 ## Architecture
 
