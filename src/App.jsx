@@ -46,16 +46,6 @@ function getBeyStatus(recording, wsStatus, device, isExpired, goodLaunchRpm) {
   return recording.status;
 }
 
-const toggleFullSceen = () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }
-};
-
 function App() {
   const [expiredRecording, setExpiredRecording] = useState(null);
   const [aiEnabled, setAiEnabled] = useState(false);
@@ -230,7 +220,7 @@ function App() {
 
           {/* title */}
           <div className="title-plate">
-            <div className="title-pill" onClick={toggleFullSceen}>
+            <div className="title-pill">
               <span className="title-text">DiZZi<span className="dot">.</span><span className="ver">02</span></span>
             </div>
           </div>
