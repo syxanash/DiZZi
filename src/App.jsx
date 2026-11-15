@@ -8,7 +8,6 @@ import VoiceFlare from './VoiceFlare';
 import ConfirmModal from './ConfirmModal';
 import ActionsModal from './ActionsModal';
 
-// prerecorded clips from scripts/generate-clips.mjs
 const RESULT_CLIPS = {
   1: ['win_p1_1', 'win_p1_2', 'win_p1_3'],
   2: ['win_p2_1', 'win_p2_2', 'win_p2_3'],
