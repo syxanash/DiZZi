@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useEffectEvent, useRef } from 'react';
 import { sample } from 'lodash';
 import './App.css';
 import { useBleSocket } from './useBleSocket';
@@ -7,6 +7,13 @@ import InfoPanel from './InfoPanel';
 import VoiceFlare from './VoiceFlare';
 import ConfirmModal from './ConfirmModal';
 import ActionsModal from './ActionsModal';
+
+// prerecorded clips from scripts/generate-clips.mjs
+const RESULT_CLIPS = {
+  1: ['win_p1_1', 'win_p1_2', 'win_p1_3'],
+  2: ['win_p2_1', 'win_p2_2', 'win_p2_3'],
+  draw: ['draw_1', 'draw_2'],
+};
 
 const IDLE_AFTER_MS = {
   dropped: 10000,
@@ -160,6 +167,22 @@ function App() {
   const winner = !roundDone ? null
     : round[1] === round[2] ? 'draw'
       : round[1] > round[2] ? 1 : 2;
+
+  // the round result is the only thing the voice says in competitive mode
+  const announceResult = useEffectEvent((result) => {
+    if (aiEnabled) {
+      const text = result === 'draw'
+        ? `It's a draw! Both at ${round[1]} RPM!`
+        : `Player ${result} wins by ${Math.abs(round[1] - round[2])} RPM!`;
+      voiceRef.current?.playTTS(text);
+    } else {
+      voiceRef.current?.playClip(sample(RESULT_CLIPS[result]));
+    }
+  });
+
+  useEffect(() => {
+    if (winner) announceResult(winner);
+  }, [winner]);
 
   const beyStatus = getBeyStatus(recording, wsStatus, device, expiredRecording === recording, goodLaunchRpm);
 
