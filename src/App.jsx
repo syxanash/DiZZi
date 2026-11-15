@@ -13,8 +13,12 @@ const IDLE_AFTER_MS = {
   launched: 15000,
 };
 
-async function requestRecordings() {
-  const res = await fetch('/api/recordings', { method: 'POST' });
+async function requestRecordings(deviceId) {
+  const res = await fetch('/api/recordings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId }),
+  });
   const data = await res.json();
 
   if (!res.ok) throw new Error(data.error);
@@ -53,13 +57,16 @@ function App() {
   const [requested, setRequested] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [competitive, setCompetitive] = useState(false);
+  const [round, setRound] = useState({});
 
   const ask = (message, action) => setConfirm({ message, action });
 
   const voiceRef = useRef(null);
 
-  // with AI we generate the line via TTS, otherwise we play the prerecorded clip
   const say = (text, clip) => {
+    if (competitive) return;
+
     if (aiEnabled) {
       voiceRef.current?.playTTS(text);
     } else {
@@ -67,15 +74,29 @@ function App() {
     }
   };
 
-  async function sendDisconnect() {
-    const res = await fetch('/api/disconnect', { method: 'POST' });
+  async function sendDisconnect(deviceId) {
+    const res = await fetch('/api/disconnect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId }),
+    });
     if (!res.ok) throw new Error((await res.json()).error);
     setBattery(undefined);
     setExpiredRecording(null);
   }
 
-  const { wsStatus, device, recording, clearRecording } = useBleSocket({
+  const requestedIds = useRef(new Set());
+
+  const { wsStatus, device, recording, recordings, clearRecording, devices } = useBleSocket({
     onRecording: (rec) => {
+      if (competitive && rec.slot) {
+        if (rec.status === 'launched') {
+          setRound((r) => ({ ...r, [rec.slot]: rec.launchesValues.at(-1) }));
+        } else if (rec.status === 'attached') {
+          setRound((r) => (r[1] != null && r[2] != null ? {} : r));
+        }
+      }
+
       if (rec.battery != null && (rec.status === 'history' || rec.status === 'attached')) {
         setBattery(Math.floor(rec.battery));
       }
@@ -103,13 +124,21 @@ function App() {
       });
   }, []);
 
+  if (device !== 'connected' && requested) setRequested(false);
+
   useEffect(() => {
-    if (device === 'connected') {
-      requestRecordings().then(setRequested).catch(console.error);
-    } else {
-      setRequested(false);
+    const list = Object.values(devices);
+    if (list.length === 0) requestedIds.current.clear();
+
+    for (const d of list) {
+      if (d.status !== 'connected') {
+        requestedIds.current.delete(d.id);
+      } else if (!requestedIds.current.has(d.id)) {
+        requestedIds.current.add(d.id);
+        requestRecordings(d.id).then(setRequested).catch(console.error);
+      }
     }
-  }, [device]);
+  }, [devices]);
 
   useEffect(() => {
     const delay = IDLE_AFTER_MS[recording?.status];
@@ -118,6 +147,13 @@ function App() {
     const idleTimeout = setTimeout(() => setExpiredRecording(recording), delay);
     return () => clearTimeout(idleTimeout);
   }, [recording]);
+
+  const connectedCount = Object.values(devices).filter((d) => d.status === 'connected').length;
+
+  const roundDone = round[1] != null && round[2] != null && connectedCount === 2;
+  const winner = !roundDone ? null
+    : round[1] === round[2] ? 'draw'
+      : round[1] > round[2] ? 1 : 2;
 
   const beyStatus = getBeyStatus(recording, wsStatus, device, expiredRecording === recording, goodLaunchRpm);
 
@@ -152,7 +188,7 @@ function App() {
           </div>
 
           {/* little crosshair glyph */}
-          <div className="crosshair" style={{ display: beyStatus === 'disconnected' ? 'none' : 'block' }} aria-label="Options" onClick={() => setActionsOpen(true)}>
+          <div className="crosshair" aria-label="Options" onClick={() => setActionsOpen(true)}>
             <span></span><span></span>
           </div>
 
@@ -170,26 +206,48 @@ function App() {
                   <VoiceFlare ref={voiceRef} />
                 </div>
               </div>
-              <div className="gauge-label gauge-label--top">{battery ?? '--'}</div>
-              <div className="gauge-label gauge-label--bottom">{battery ?? '--'}</div>
+              <div className="gauge-label gauge-label--top">{competitive ? '--' : battery ?? '--'}</div>
+              <div className="gauge-label gauge-label--bottom">{competitive ? '--' : battery ?? '--'}</div>
             </div>
           </div>
 
           <div className="main-panel">
-            <div className="beyblade-side">
-              <Beyblade status={beyStatus} />
-            </div>
-            <InfoPanel
-              recording={recording}
-              requested={requested && device === 'connected'}
-              onClose={() => ask('Disconnect device?', sendDisconnect)}
-            />
+            {competitive ? (
+              [1, 2].map((slot) => {
+                const dev = devices[slot];
+                const connected = dev?.status === 'connected';
+                return (
+                  <InfoPanel
+                    key={slot}
+                    player={slot}
+                    result={!winner ? null : winner === 'draw' ? 'draw' : winner === slot ? 'win' : 'lose'}
+                    recording={recordings[slot]}
+                    requested={connected}
+                    waitingText={connected ? null : `WAITING FOR PLAYER ${slot}`}
+                    onClose={() => connected && ask(`Disconnect player ${slot}?`, () => sendDisconnect(dev.id))}
+                  />
+                );
+              })
+            ) : (
+              <>
+                <div className="beyblade-side">
+                  <Beyblade status={beyStatus} />
+                </div>
+                <InfoPanel
+                  recording={recording}
+                  requested={requested && device === 'connected'}
+                  onClose={() => ask('Disconnect device?', sendDisconnect)}
+                />
+              </>)}
           </div>
         </div>
       </div>
 
       {actionsOpen && (
         <ActionsModal
+          canManageDevice={connectedCount === 1}
+          competitive={competitive}
+          onToggleCompetitive={() => { setCompetitive((c) => !c); setRound({}); }}
           onClose={() => setActionsOpen(false)}
           onReset={() => {
             setActionsOpen(false);

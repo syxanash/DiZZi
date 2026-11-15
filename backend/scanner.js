@@ -136,6 +136,8 @@ export function startBluetooth() {
         console.log(`Bluetooth ${peripheralName} disconnected...`);
         bleEvents.emit('device', { id: device.id, slot: device.slot, device: 'disconnected' });
         clearTimeout(device.flushTimer);
+        // lets in-flight commands (e.g. getRecordings' 700ms wait) notice the drop
+        device.writeCharacteristic = null;
         devices.delete(device.id);
         noble.startScanningAsync([], true);
       });
