@@ -9,7 +9,7 @@ const BATTERY_BYTEPOS = 4;
 const RESET_ACK_PAGE = 0xa1;
 
 export function battlepassDecoder(payload, ctx = {}) {
-  console.log(payload);
+  // console.log(payload);
 
   const battlepass = {
     highScore: undefined,

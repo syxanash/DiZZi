@@ -122,6 +122,12 @@ function App() {
         setAiEnabled(cfg.aiEnabled);
         setGoodLaunchRpm(cfg.goodLaunchRpm);
       });
+
+    fetch('/api/mode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ competitive: false }),
+    }).catch(console.error);
   }, []);
 
   if (device !== 'connected' && requested) setRequested(false);
@@ -159,12 +165,20 @@ function App() {
 
   // switching mode starts from a clean slate: drop every connected Battle Pass
   async function switchMode() {
+    const next = !competitive;
+
     const connected = Object.values(devices).filter((d) => d.status === 'connected');
-    // one at a time: noble is happier with sequential BLE operations
     for (const d of connected) {
       await sendDisconnect(d.id).catch(console.error);
     }
-    setCompetitive((c) => !c);
+
+    await fetch('/api/mode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ competitive: next }),
+    }).catch(console.error);
+
+    setCompetitive(next);
     setRound({});
   }
 

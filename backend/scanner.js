@@ -118,7 +118,7 @@ export function startBluetooth() {
 
     if (!name) return;
 
-    console.log(`Found: ${name} | RSSI: ${peripheral.rssi}`);
+    // console.log(`Found: ${name} | RSSI: ${peripheral.rssi}`);
 
     if (name !== peripheralName || connecting) return;
     if (devices.has(peripheral.id) || devices.size >= MAX_DEVICES) return;

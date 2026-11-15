@@ -16,6 +16,8 @@ const server = createServer(app);
 
 const devices = new Map();
 
+let competitiveMode = false;
+
 app.use(express.json());
 
 app.get('/api/config', (_req, res) => {
@@ -35,6 +37,11 @@ app.post('/api/tts', async (req, res) => {
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
+});
+
+app.post('/api/mode', (req, res) => {
+  competitiveMode = !!req.body?.competitive;
+  res.json({ competitiveMode });
 });
 
 app.use('/api/audio', express.static(AUDIO_DIR));
@@ -102,6 +109,8 @@ bleEvents.on('recording', async (recording) => {
     broadcast({ type: 'comment', comment: pickComment(recording) });
     return;
   }
+
+  if (competitiveMode) return;
 
   try {
     const comment = await llm.askBrain(recording);
