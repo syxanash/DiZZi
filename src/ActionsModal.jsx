@@ -4,6 +4,8 @@ import './InfoPanel.css';
 import './ActionsModal.css';
 
 export default function ActionsModal({ competitive, canManageDevice, onToggleCompetitive, onReset, onDisconnect, onClose }) {
+  const isElectron = navigator.userAgent.includes('Electron');
+
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
@@ -47,9 +49,13 @@ export default function ActionsModal({ competitive, canManageDevice, onToggleCom
             onClick={onClose}>✕</span>
         </div>
         <div className="terminal actions-modal__body">
-          <button type="button" onClick={toggleFullSceen}>
-            TOGGLE FULLSCREEN: {isFullscreen ? 'OFF' : 'ON'}
-          </button>
+          {
+            isElectron
+              ? null
+              : <button type="button" onClick={toggleFullSceen}>
+                TOGGLE FULLSCREEN: {isFullscreen ? 'OFF' : 'ON'}
+              </button>
+          }
           <button type="button" onClick={onToggleCompetitive}>
             COMPETITIVE MODE: {competitive ? 'ON' : 'OFF'}
           </button>
