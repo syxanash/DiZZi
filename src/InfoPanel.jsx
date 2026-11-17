@@ -149,7 +149,9 @@ function HistoricalData({ levels, values }) {
 }
 
 function renderTerminalText(recording, competitive) {
-  function isNewHighScore({ launchesValues, highScore }) {
+  function isNewHighScore({ launchesValues, highScore, status }) {
+    if (status !== 'launched' || launchesValues.length < 2) return false;
+
     const last = launchesValues.at(-1);
     const previousBest = Math.max(0, ...launchesValues.slice(0, -1));
 
@@ -163,6 +165,7 @@ function renderTerminalText(recording, competitive) {
     const average = recording.launchesValues.length === 0 ? 0 : Math.round(recording.launchesValues.reduce((a, b) => a + b, 0) / recording.launchesValues.length);
 
     const newHighScore = isNewHighScore(recording);
+
     return <>
       {recording.status === 'launched' ?
         <><p>Launch Power:</p>
