@@ -17,6 +17,7 @@ const server = createServer(app);
 const devices = new Map();
 
 let competitiveMode = false;
+let mute = true;
 
 app.use(express.json());
 
@@ -40,8 +41,17 @@ app.post('/api/tts', async (req, res) => {
 });
 
 app.post('/api/mode', (req, res) => {
-  competitiveMode = !!req.body?.competitive;
-  res.json({ competitiveMode });
+  const body = req.body ?? {};
+
+  if ('competitive' in body) {
+    competitiveMode = Boolean(body.competitive);
+  }
+
+  if ('mute' in body) {
+    mute = Boolean(body.mute);
+  }
+
+  res.json({ competitiveMode, mute });
 });
 
 app.use('/api/audio', express.static(AUDIO_DIR));
@@ -103,14 +113,13 @@ bleEvents.on('recording', async (recording) => {
   broadcast({ type: 'recording', recording });
 
   if (recording.status !== 'launched') return;
+  if (competitiveMode || mute) return;
 
   // without AI we skip ollama entirely and pick a prerecorded clip
   if (!AI_ENABLED) {
     broadcast({ type: 'comment', comment: pickComment(recording) });
     return;
   }
-
-  if (competitiveMode) return;
 
   try {
     const comment = await llm.askBrain(recording);

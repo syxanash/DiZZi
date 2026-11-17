@@ -3,7 +3,7 @@ import './ConfirmModal.css';
 import './InfoPanel.css';
 import './ActionsModal.css';
 
-export default function ActionsModal({ competitive, canManageDevice, onToggleCompetitive, onReset, onDisconnect, onClose }) {
+export default function ActionsModal({ competitive, canManageDevice, onToggleCompetitive, mute, onToggleMute, onReset, onDisconnect, onClose }) {
   const isElectron = navigator.userAgent.includes('Electron');
 
   useEffect(() => {
@@ -56,6 +56,9 @@ export default function ActionsModal({ competitive, canManageDevice, onToggleCom
                 TOGGLE FULLSCREEN: {isFullscreen ? 'OFF' : 'ON'}
               </button>
           }
+          <button type="button" onClick={onToggleMute}>
+            MUTE DIZZI: {mute ? 'ON' : 'OFF'}
+          </button>
           <button type="button" onClick={onToggleCompetitive}>
             COMPETITIVE MODE: {competitive ? 'ON' : 'OFF'}
           </button>

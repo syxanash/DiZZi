@@ -54,6 +54,7 @@ function App() {
   const [confirm, setConfirm] = useState(null);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [competitive, setCompetitive] = useState(false);
+  const [mute, setMute] = useState(false);
   const [round, setRound] = useState({});
 
   const ask = (message, action) => setConfirm({ message, action });
@@ -61,7 +62,7 @@ function App() {
   const voiceRef = useRef(null);
 
   const say = (text, clip) => {
-    if (competitive) return;
+    if (competitive || mute) return;
 
     if (aiEnabled) {
       voiceRef.current?.playTTS(text);
@@ -122,7 +123,7 @@ function App() {
     fetch('/api/mode', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ competitive: false }),
+      body: JSON.stringify({ competitive: false, mute: false }),
     }).catch(console.error);
   }, []);
 
@@ -159,6 +160,8 @@ function App() {
 
   // the round result is the only thing the voice says in competitive mode
   const announceResult = useEffectEvent((result) => {
+    if (mute) return;
+
     if (aiEnabled) {
       const text = result === 'draw'
         ? `It's a draw! Both at ${round[1]} RPM!`
@@ -174,6 +177,18 @@ function App() {
   }, [winner]);
 
   const beyStatus = getBeyStatus(recording, wsStatus, device, expiredRecording === recording, goodLaunchRpm);
+
+  async function toggleMute() {
+    const next = !mute;
+
+    await fetch('/api/mode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mute: next }),
+    }).catch(console.error);
+
+    setMute(next);
+  }
 
   // switching mode starts from a clean slate: drop every connected Battle Pass
   async function switchMode() {
@@ -282,13 +297,15 @@ function App() {
 
       {actionsOpen && (
         <ActionsModal
-          canManageDevice={connectedCount === 1}
+          canManageDevice={!competitive && connectedCount === 1}
           competitive={competitive}
           onToggleCompetitive={() => {
             if (connectedCount === 0) return switchMode();
             setActionsOpen(false);
             ask('Switching mode will disconnect all devices. Continue?', switchMode);
           }}
+          mute={mute}
+          onToggleMute={toggleMute}
           onClose={() => setActionsOpen(false)}
           onReset={() => {
             setActionsOpen(false);
