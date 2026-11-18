@@ -3,6 +3,24 @@ import './ConfirmModal.css';
 import './InfoPanel.css';
 import './ActionsModal.css';
 
+function Toggle({ label, checked, onChange }) {
+  return (
+    <div className="toggle-row">
+      <span>{label}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        className="toggle"
+        onClick={onChange}
+      >
+        <span className="toggle__knob" />
+      </button>
+    </div>
+  );
+}
+
 export default function ActionsModal({ competitive, canManageDevice, onToggleCompetitive, mute, onToggleMute, onReset, onDisconnect, onClose }) {
   const isElectron = navigator.userAgent.includes('Electron');
 
@@ -49,19 +67,11 @@ export default function ActionsModal({ competitive, canManageDevice, onToggleCom
             onClick={onClose}>✕</span>
         </div>
         <div className="terminal actions-modal__body">
-          {
-            isElectron
-              ? null
-              : <button type="button" onClick={toggleFullSceen}>
-                TOGGLE FULLSCREEN: {isFullscreen ? 'OFF' : 'ON'}
-              </button>
-          }
-          <button type="button" onClick={onToggleMute}>
-            MUTE DIZZI: {mute ? 'ON' : 'OFF'}
-          </button>
-          <button type="button" onClick={onToggleCompetitive}>
-            COMPETITIVE MODE: {competitive ? 'ON' : 'OFF'}
-          </button>
+          {!isElectron && (
+            <Toggle label="FULLSCREEN" checked={isFullscreen} onChange={toggleFullSceen} />
+          )}
+          <Toggle label="MUTE DIZZI" checked={mute} onChange={onToggleMute} />
+          <Toggle label="COMPETITIVE MODE" checked={competitive} onChange={onToggleCompetitive} />
           {canManageDevice && <>
             <button type="button" onClick={onReset}>CLEAR LAUNCH RECORDS</button>
             <button type="button" onClick={onDisconnect}>DISCONNECT DEVICE</button>

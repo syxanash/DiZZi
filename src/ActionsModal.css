@@ -20,9 +20,54 @@
   text-shadow: inherit;
 }
 
-.actions-modal__body button:hover,
-.actions-modal__body button:focus-visible {
+.actions-modal__body button:not(.toggle):hover,
+.actions-modal__body button:not(.toggle):focus-visible {
   background: rgb(255, 231, 51);
   color: #000;
   outline: none;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.actions-modal__body .toggle {
+  flex: none;
+  position: relative;
+  width: 2.2em;
+  height: 1em;
+  padding: 0;
+  border: 1px solid rgb(255, 231, 51);
+  background: #000;
+  box-sizing: border-box;
+}
+
+.actions-modal__body .toggle:focus-visible {
+  outline: 1px dashed rgb(255, 231, 51);
+  outline-offset: 3px;
+}
+
+.toggle__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(1em - 6px);
+  height: calc(1em - 6px);
+  border: 1px solid rgb(255, 231, 51);
+  background: #000;
+  box-sizing: border-box;
+  transition: transform 120ms steps(3), background 120ms;
+}
+
+.toggle[aria-checked="true"] .toggle__knob {
+  transform: translateX(1.2em);
+  background: rgb(255, 231, 51);
+}
+
+.toggle:hover .toggle__knob {
+  box-shadow: 0 0 6px rgb(255, 231, 51);
 }

@@ -12,6 +12,7 @@ const RESULT_CLIPS = {
   1: ['win_p1_1', 'win_p1_2', 'win_p1_3'],
   2: ['win_p2_1', 'win_p2_2', 'win_p2_3'],
   draw: ['draw_1', 'draw_2'],
+  comp: 'competitive'
 };
 
 const IDLE_AFTER_MS = {
@@ -204,6 +205,14 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ competitive: next }),
     }).catch(console.error);
+
+    if (!mute && next) {
+      if (aiEnabled) {
+        voiceRef.current?.playTTS("Initiating competitive mode!");
+      } else {
+        voiceRef.current?.playClip(RESULT_CLIPS.comp);
+      }
+    }
 
     setCompetitive(next);
     setRound({});
