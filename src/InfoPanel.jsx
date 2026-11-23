@@ -181,7 +181,7 @@ function renderTerminalText(recording, competitive, goodLaunchRpm) {
 
     return <>
       {recording.status === 'launched' ?
-        <><p>Launch Power:</p>
+        <><p>Shoot Power:</p>
           <div style={{ textAlign: 'center' }}>
             <ScoreCounter
               key={recording.lifetimeCounter}
