@@ -5,11 +5,24 @@ const BLOCKS = '▁▂▃▄▅▆▇█';
 const MAX_COLS = 19;
 const MAX_VISIBLE_RECORDINGS = 10;
 
-function levelColor(level) {
-  if (level <= 2) return '#f33';
-  if (level <= 3) return 'rgb(255, 160, 51)';
-  if (level <= 6) return 'rgb(255, 231, 51)';
-  return 'rgb(51, 255, 75)';
+const BELOW_COLORS = [
+  'rgb(255, 51, 51)',   // weak
+  'rgb(255, 90, 51)',
+  'rgb(255, 130, 51)',
+  'rgb(255, 160, 51)',
+  'rgb(255, 196, 51)',
+  'rgb(255, 231, 51)',  // almost there
+];
+const GOOD_COLOR = 'rgb(51, 255, 75)';
+
+// Absolute color: green at/above goodLaunchRpm; below it, scale from goodLaunchRpm / 2
+// (the same "weak" line backend/llm.js uses) up to goodLaunchRpm.
+function rpmColor(v, goodLaunchRpm) {
+  if (goodLaunchRpm == null) return 'rgb(200, 200, 200)'; // config not loaded yet
+  if (v >= goodLaunchRpm) return GOOD_COLOR;
+  const floor = goodLaunchRpm / 2;
+  const t = Math.max(0, (v - floor) / (goodLaunchRpm - floor));
+  return BELOW_COLORS[Math.min(BELOW_COLORS.length - 1, Math.floor(t * BELOW_COLORS.length))];
 }
 
 function toLevel(v, min, max) {
@@ -33,21 +46,20 @@ function useColumns(ref, probeRef, maxCols) {
   return cols;
 }
 
-function Sparkline({ values }) {
+// Bar height is relative (levels); color is absolute (rpmColor), same as HistoricalData.
+function Sparkline({ levels, values, goodLaunchRpm }) {
   const ref = useRef(null);
   const probeRef = useRef(null);
   const cols = useColumns(ref, probeRef, MAX_COLS);
-  const recent = values.slice(-cols);
-  const min = Math.min(...recent);
-  const max = Math.max(...recent);
+  const recentLevels = levels.slice(-cols);
+  const recentValues = values.slice(-cols);
 
   return (
     <p ref={ref} className="sparkline">
       <span ref={probeRef} className="sparkline-probe" aria-hidden="true">{BLOCKS.at(-1)}</span>
-      {recent.map((v, i) => {
-        const level = toLevel(v, min, max);
-        return <span key={i} style={{ color: levelColor(level) }}>{BLOCKS[level]}</span>;
-      })}
+      {recentLevels.map((level, i) => (
+        <span key={i} style={{ color: rpmColor(recentValues[i], goodLaunchRpm) }}>{BLOCKS[level]}</span>
+      ))}
     </p>
   );
 }
@@ -114,41 +126,42 @@ const ScoreCounter = memo(function ScoreCounter({ value, duration = 800, newScor
   );
 });
 
-function HistoricalData({ levels, values }) {
+function HistoricalData({ values, goodLaunchRpm }) {
   const [showMore, setShowMore] = useState(false);
   const collapsed = values.length > MAX_VISIBLE_RECORDINGS && !showMore;
 
-  const items = values.map((item, i) => (
-    <span key={i} style={{ color: levelColor(levels[i]) }} className={i === values.length - 1 ? 'last-score-anim' : null}>
-      {item}
-    </span>
-  )).toReversed();
+  const visible = collapsed ? values.slice(-MAX_VISIBLE_RECORDINGS) : values;
+  const offset = values.length - visible.length;
 
   return (
     <div className="prev-recordings">
-      {collapsed ? items.slice(0, MAX_VISIBLE_RECORDINGS) : items}
+      {visible.map((item, i) => {
+        const idx = offset + i;
+        return (
+          <span
+            key={idx}
+            style={{ color: rpmColor(item, goodLaunchRpm) }}
+            className={idx === values.length - 1 ? 'last-score-anim' : null}
+          >
+            {item}
+          </span>
+        );
+      }).toReversed()}
       {collapsed && (
         <button
           type="button"
+          className="link-btn"
+          title={`Show ${offset} older launches`}
           onClick={() => setShowMore(true)}
-          style={{
-            color: 'rgb(51, 221, 255)',
-            textDecoration: 'underline',
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            font: 'inherit',
-            cursor: 'pointer',
-          }}
         >
-          ...
+          +{offset}
         </button>
       )}
     </div>
   );
 }
 
-function renderTerminalText(recording, competitive) {
+function renderTerminalText(recording, competitive, goodLaunchRpm) {
   function isNewHighScore({ launchesValues, highScore, status }) {
     if (status !== 'launched' || launchesValues.length < 2) return false;
 
@@ -180,8 +193,14 @@ function renderTerminalText(recording, competitive) {
       }
       {newHighScore ? <div style={{ textAlign: 'center', fontStyle: 'italic' }}><p>WOW NEW SCORE!</p></div> : null}
       <p><span style={{ color: 'rgb(51, 221, 255)' }}>{recording.lifetimeCounter}</span> launches:</p>
-      {recording.launchesValues.length > 0 && <Sparkline values={recording.launchesValues} />}
-      <HistoricalData levels={allLevels} values={recording.launchesValues} />
+      {recording.launchesValues.length > 0 && (
+        <Sparkline
+          levels={allLevels}
+          values={recording.launchesValues}
+          goodLaunchRpm={goodLaunchRpm}
+        />
+      )}
+      <HistoricalData values={recording.launchesValues} goodLaunchRpm={goodLaunchRpm} />
       <div className="stats-row">
         <p>Highest: <span style={{ color: 'rgb(51, 221, 255)' }}>{recording.highScore}</span></p>
         <p>Average: <span style={{ color: 'rgb(51, 221, 255)' }}>{average}</span></p>
@@ -228,7 +247,7 @@ function LoaderScreen({ started, loaded, onDone }) {
   </div>;
 }
 
-export default function InfoPanel({ recording, requested, waitingText, onClose, result, player }) {
+export default function InfoPanel({ recording, requested, waitingText, onClose, result, player, goodLaunchRpm }) {
   const competitive = player != null;
   const [loaderDone, setLoaderDone] = useState(false);
 
@@ -256,7 +275,7 @@ export default function InfoPanel({ recording, requested, waitingText, onClose, 
             waitingText
               ? <div className="centered-text"><p>{waitingText} <span className="terminal-cursor">▒</span></p></div>
               : recording && loaderDone
-                ? renderTerminalText(recording, competitive)
+                ? renderTerminalText(recording, competitive, goodLaunchRpm)
                 : <LoaderScreen started={requested} loaded={!!recording} onDone={() => setLoaderDone(true)} />
           }
         </div>

@@ -283,6 +283,7 @@ function App() {
                     player={slot}
                     result={!winner ? null : winner === 'draw' ? 'draw' : winner === slot ? 'win' : 'lose'}
                     recording={recordings[slot]}
+                    goodLaunchRpm={goodLaunchRpm}
                     requested={connected}
                     waitingText={connected ? null : `WAITING FOR PLAYER ${slot}`}
                     onClose={() => connected && ask(`Disconnect player ${slot}?`, () => sendDisconnect(dev.id))}
@@ -296,6 +297,7 @@ function App() {
                 </div>
                 <InfoPanel
                   recording={recording}
+                  goodLaunchRpm={goodLaunchRpm}
                   requested={requested && device === 'connected'}
                   onClose={() => ask('Disconnect device?', sendDisconnect)}
                 />
