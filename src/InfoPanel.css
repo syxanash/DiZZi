@@ -2,6 +2,29 @@
   flex: 1 1 60%;
   min-width: 0;
   display: flex;
+  position: relative;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.info-panel--dragging {
+  z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.info-panel--settling {
+  z-index: 10;
+  transition: none;
+}
+
+.terminal-titlebar--draggable {
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.info-panel--dragging .terminal-titlebar--draggable {
+  cursor: grabbing;
 }
 
 .terminal-window {

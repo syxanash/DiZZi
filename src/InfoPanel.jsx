@@ -247,16 +247,67 @@ function LoaderScreen({ started, loaded, onDone }) {
   </div>;
 }
 
-export default function InfoPanel({ recording, requested, waitingText, onClose, result, player, goodLaunchRpm }) {
+export default function InfoPanel({ recording, requested, waitingText, onClose, result, player, goodLaunchRpm, side, onSwap, order }) {
   const competitive = player != null;
   const [loaderDone, setLoaderDone] = useState(false);
+  const [dragX, setDragX] = useState(null);
+  const [settleX, setSettleX] = useState(null);
+  const dragStart = useRef(0);
+  const panelRef = useRef(null);
 
   if (!recording && loaderDone) setLoaderDone(false);
 
+  const canDrag = competitive && !!onSwap;
+
+  function handlePointerDown(e) {
+    if (!canDrag || e.button !== 0 || e.target.closest('.terminal-btn')) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragStart.current = e.clientX;
+    setDragX(0);
+  }
+
+  function handlePointerMove(e) {
+    if (dragX == null) return;
+    const dx = e.clientX - dragStart.current;
+    setDragX(side === 'left' ? Math.max(0, dx) : Math.min(0, dx));
+  }
+
+  function handlePointerUp() {
+    if (dragX == null) return;
+    const width = panelRef.current?.offsetWidth ?? Infinity;
+    if (Math.abs(dragX) > width / 2) {
+      onSwap();
+      setSettleX(dragX - Math.sign(dragX) * width);
+    }
+    setDragX(null);
+  }
+
+  useEffect(() => {
+    if (settleX == null) return;
+    const id = requestAnimationFrame(() => setSettleX(null));
+    return () => cancelAnimationFrame(id);
+  }, [settleX]);
+
+  const dragging = dragX != null;
+
   return (
-    <div className="info-panel" style={{ padding: competitive ? 0 : '24px' }}>
+    <div
+      ref={panelRef}
+      className={`info-panel${dragging ? ' info-panel--dragging' : ''}${settleX != null ? ' info-panel--settling' : ''}`}
+      style={{
+        order,
+        padding: competitive ? 0 : '24px',
+        transform: dragging
+          ? `translateX(${dragX}px) scale(1.03)`
+          : settleX != null ? `translateX(${settleX}px)` : undefined,
+      }}>
       <div className="terminal-window">
-        <div className="terminal-titlebar">
+        <div
+          className={`terminal-titlebar${canDrag ? ' terminal-titlebar--draggable' : ''}`}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={() => setDragX(null)}>
           <span
             className="terminal-btn terminal-btn--close"
             aria-label="Disconnect"

@@ -57,6 +57,7 @@ function App() {
   const [competitive, setCompetitive] = useState(false);
   const [mute, setMute] = useState(false);
   const [round, setRound] = useState({});
+  const [slotOrder, setSlotOrder] = useState([1, 2]);
 
   const ask = (message, action) => setConfirm({ message, action });
 
@@ -275,12 +276,16 @@ function App() {
           <div className="main-panel">
             {competitive ? (
               [1, 2].map((slot) => {
+                const index = slotOrder.indexOf(slot);
                 const dev = devices[slot];
                 const connected = dev?.status === 'connected';
                 return (
                   <InfoPanel
                     key={slot}
                     player={slot}
+                    order={index}
+                    side={index === 0 ? 'left' : 'right'}
+                    onSwap={() => setSlotOrder(([a, b]) => [b, a])}
                     result={!winner ? null : winner === 'draw' ? 'draw' : winner === slot ? 'win' : 'lose'}
                     recording={recordings[slot]}
                     goodLaunchRpm={goodLaunchRpm}
