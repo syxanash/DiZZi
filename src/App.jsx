@@ -20,6 +20,24 @@ const IDLE_AFTER_MS = {
   launched: 15000,
 };
 
+const MODE_KEY = 'competitive';
+
+function loadCompetitive() {
+  try {
+    return sessionStorage.getItem(MODE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function saveCompetitive(value) {
+  try {
+    sessionStorage.setItem(MODE_KEY, String(value));
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 async function requestRecordings(deviceId) {
   const res = await fetch('/api/recordings', {
     method: 'POST',
@@ -54,10 +72,11 @@ function App() {
   const [requested, setRequested] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [competitive, setCompetitive] = useState(false);
+  const [competitive, setCompetitive] = useState(loadCompetitive);
   const [mute, setMute] = useState(false);
   const [round, setRound] = useState({});
   const [slotOrder, setSlotOrder] = useState([1, 2]);
+  const [highlightId, setHighlightId] = useState(undefined);
 
   const ask = (message, action) => setConfirm({ message, action });
 
@@ -93,6 +112,8 @@ function App() {
           setRound((r) => ({ ...r, [rec.slot]: rec.launchesValues.at(-1) }));
         } else if (rec.status === 'attached') {
           setRound((r) => (r[1] != null && r[2] != null ? {} : r));
+        } else if (rec.status === 'mode-changed') {
+          setHighlightId(rec.deviceId);
         }
       }
 
@@ -125,9 +146,12 @@ function App() {
     fetch('/api/mode', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ competitive: false, mute: false }),
+      body: JSON.stringify({ competitive: loadCompetitive(), mute: false }),
     }).catch(console.error);
   }, []);
+
+  const highlightedDevice = Object.values(devices).find((d) => d.id === highlightId);
+  if (highlightId && highlightedDevice?.status !== 'connected') setHighlightId(undefined);
 
   if (device !== 'connected' && requested) setRequested(false);
 
@@ -216,6 +240,7 @@ function App() {
     }
 
     setCompetitive(next);
+    saveCompetitive(next);
     setRound({});
   }
 
@@ -281,6 +306,8 @@ function App() {
                 const connected = dev?.status === 'connected';
                 return (
                   <InfoPanel
+                    highlight={connected && dev.id === highlightId}
+                    onEndHighlight={() => { setHighlightId(undefined); }}
                     key={slot}
                     player={slot}
                     order={index}

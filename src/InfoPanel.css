@@ -17,6 +17,34 @@
   transition: none;
 }
 
+.info-panel--overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(242, 255, 0, 0.35);
+  pointer-events: none;
+  z-index: 5;
+  animation: overlay-flash 1s ease-out forwards;
+}
+
+@keyframes overlay-flash {
+  0% {
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 .terminal-titlebar--draggable {
   touch-action: none;
   user-select: none;

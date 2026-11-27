@@ -247,7 +247,7 @@ function LoaderScreen({ started, loaded, onDone }) {
   </div>;
 }
 
-export default function InfoPanel({ recording, requested, waitingText, onClose, result, player, goodLaunchRpm, side, onSwap, order }) {
+export default function InfoPanel({ highlight, onEndHighlight, recording, requested, waitingText, onClose, result, player, goodLaunchRpm, side, onSwap, order }) {
   const competitive = player != null;
   const [loaderDone, setLoaderDone] = useState(false);
   const [dragX, setDragX] = useState(null);
@@ -293,7 +293,10 @@ export default function InfoPanel({ recording, requested, waitingText, onClose, 
   return (
     <div
       ref={panelRef}
-      className={`info-panel${dragging ? ' info-panel--dragging' : ''}${settleX != null ? ' info-panel--settling' : ''}`}
+      className={`info-panel${dragging ? ' info-panel--dragging' : ''} ${highlight ? 'info-panel--overlay' : ''} ${settleX != null ? ' info-panel--settling' : ''}`}
+      onAnimationEnd={(e) => {
+        if (e.animationName === 'overlay-flash') { onEndHighlight?.(); }
+      }}
       style={{
         order,
         padding: competitive ? 0 : '24px',

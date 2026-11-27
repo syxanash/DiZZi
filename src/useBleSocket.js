@@ -42,8 +42,10 @@ export function useBleSocket({ url = `ws://${location.host}/ws`, onRecording, on
           setDevice(msg.device);
           if (msg.device !== 'connected') setRecording(null);
         } else if (msg.type === 'recording') {
-          setRecordings((r) => ({ ...r, [msg.recording.slot]: msg.recording }));
-          setRecording(msg.recording);
+          if (msg.recording.status !== 'mode-changed') {
+            setRecordings((r) => ({ ...r, [msg.recording.slot]: msg.recording }));
+            setRecording(msg.recording);
+          }
           notifyRecording(msg.recording);
         } else if (msg.type === 'comment') {
           notifyComment(msg.comment);

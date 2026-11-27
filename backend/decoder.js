@@ -8,8 +8,11 @@ const BATTERY_BYTEPOS = 4;
 
 const RESET_ACK_PAGE = 0xa1;
 
+const FLAG_ATTACHED = 0x04;
+const FLAG_MODE = 0x10;
+
 export function battlepassDecoder(payload, ctx = {}) {
-  // console.log(payload);
+  console.log(payload);
 
   const battlepass = {
     highScore: undefined,
@@ -23,6 +26,7 @@ export function battlepassDecoder(payload, ctx = {}) {
 
   if (isReset) {
     ctx.globalCounter = undefined;
+    ctx.altMode = undefined;
     battlepass.status = "reset";
     battlepass.lifetimeCounter = 0;
     return battlepass;
@@ -36,18 +40,29 @@ export function battlepassDecoder(payload, ctx = {}) {
     // in the same flush window: decode in order so the last event wins
     for (const header of payload) {
       const launchesCounter = header.readUInt16LE(COUNTER_BYTEPOS);
-      const status = header[LAUNCHERMODE_BYTEPOS].toString(16);
+      const mode = header[LAUNCHERMODE_BYTEPOS];
+      const attached = (mode & FLAG_ATTACHED) !== 0;
+      const altMode = (mode & FLAG_MODE) !== 0;
       const highScore = header.readUInt16LE(HIGHSCORE_BYTEPOS);
       const batteryValue = (header[BATTERY_BYTEPOS] * 100) / 255;
 
-      if (status === '4') {
+      const prevAltMode = ctx.altMode;
+      ctx.altMode = altMode;
+
+      if (prevAltMode !== undefined && prevAltMode !== altMode) {
+        battlepass.status = "mode-changed";
+        battlepass.altMode = altMode;
+        continue;
+      }
+
+      if (attached) {
         ctx.globalCounter = launchesCounter;
 
         battlepass.status = "attached";
         battlepass.lifetimeCounter = launchesCounter;
         battlepass.highScore = highScore;
         battlepass.battery = batteryValue;
-      } else if (status === '0' && launchesCounter <= ctx.globalCounter) {
+      } else if (launchesCounter <= ctx.globalCounter) {
         battlepass.status = "dropped";
         battlepass.lifetimeCounter = launchesCounter;
         battlepass.highScore = highScore;
@@ -94,6 +109,7 @@ export function battlepassDecoder(payload, ctx = {}) {
     const header = payload.find((page) => page[PAGE_BYTEPOS] === 0xa0);
     if (header) {
       battlepass.battery = (header[BATTERY_BYTEPOS] * 100) / 255;
+      ctx.altMode = (header[LAUNCHERMODE_BYTEPOS] & FLAG_MODE) !== 0;
     }
   }
 

@@ -214,3 +214,5 @@ export function startBluetooth() {
     // process.exit(0);
   });
 }
+
+// startBluetooth();
