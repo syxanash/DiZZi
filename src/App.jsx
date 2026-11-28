@@ -331,7 +331,7 @@ function App() {
                   recording={recording}
                   goodLaunchRpm={goodLaunchRpm}
                   requested={requested && device === 'connected'}
-                  onClose={() => ask('Disconnect device?', sendDisconnect)}
+                  onClose={() => device === 'connected' && ask('Disconnect device?', sendDisconnect)}
                 />
               </>)}
           </div>
